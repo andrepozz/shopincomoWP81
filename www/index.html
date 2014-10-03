@@ -51,7 +51,7 @@
 	
 			document.addEventListener("deviceready", function(){
 			alert("device is ready");
-			alert(device.platform);
+			alert("device platform " +device.platform);
 			if (device.platform === "WinCE" || device.platform === "Win32NT") {
 			$( "#setupApplicazione" ).popup("open");
 			}
