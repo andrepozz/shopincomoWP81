@@ -51,14 +51,7 @@
 	
 			document.addEventListener("deviceready", function(){
 			alert("device is ready");
-			alert("device platform " +device.platform);
-			if (device.platform === "WinCE" || device.platform === "Win32NT") {
 			$( "#setupApplicazione" ).popup("open");
-			}
-			else{
-			$.mobile.changePage( "#lingue", { allowSamePageTransition:true, transition: "slide" } );
-			}
-			
 			}, false);
 			
 	}
@@ -71,22 +64,9 @@
 	
 	document.addEventListener("deviceready", function(){
 	
-		
-	
-		if (device.platform === "iOS") {
-			var options = { maximumAge: 1500, timeout: 10000, enableHighAccuracy: true };
-			watchID = navigator.geolocation.watchPosition(onSuccess, onError, options);
-		}
-		
-		if (device.platform === "Android") {
-			var options = { maximumAge: 1500, timeout: 10000, enableHighAccuracy: true };
-			navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
-		}
-		
-		if (device.platform === "WinCE" || device.platform === "Win32NT") {
 			var options = { maximumAge: 1500, timeout: 30000, enableHighAccuracy: false };
 			watchID = navigator.geolocation.watchPosition(onSuccess, onError, options);
-		}
+
 			
 	}, false);
 	
@@ -122,12 +102,7 @@
     }
 	
 	function onError(error) {
-		
-		if (device.platform === "iOS" || device.platform === "Android") {
-			navigator.geolocation.getCurrentPosition(onSuccess, onErrorTimeout,{maximumAge: 1500, timeout: 20000, enableHighAccuracy : false});
-		}
-		
-		if (device.platform === "WinCE" || device.platform === "Win32NT") {			
+						
 				console.log("Geolocation Error Timeout");
 				alert(""+window.localStorage.getItem("noLocalizzazione")+"");
 				var userLatitude = "45.80806";
@@ -145,7 +120,6 @@
 			else{
 			$.mobile.loading( "hide" );
 			}
-		}
 		
     }
 	
@@ -186,13 +160,8 @@
 	
 	document.addEventListener("deviceready", function(){
 	
-	if (device.platform === "Android" || device.platform === "iOS") {
-	$('#index').append('<div data-role="footer" data-position="fixed" data-tap-toggle="false"><div data-role="navbar"><ul><li><a href="#" class="qrCode"><img src="img/qrcode.png"></a></li><li><a href="opzioni.html" rel="external" data-transition="slide"><img src="img/opzioni.png"></a></li><li><a href="#credits" data-transition="flip"><img src="img/info.png"></a></li></ul></div></div>').trigger( "create" ); 	
-	}
-	if (device.platform === "WinCE" || device.platform === "Win32NT") {	
 	$('#index').append('<div data-role="footer" data-position="fixed" data-tap-toggle="false"><div data-role="navbar"><ul><li><a href="opzioni.html" rel="external" data-transition="slide"><img src="img/opzioni.png"></a></li><li><a href="#credits" data-transition="flip"><img src="img/info.png"></a></li></ul></div></div>').trigger( "create" );
 	
-	}
 	}, false);
 
 	
@@ -223,17 +192,7 @@
 
 				function onGetDirectorySuccess(dirEntry){
 								
-						if (device.platform === "Android") {
 							onSetMetadataDirectorySuccess(dirEntry);
-						}
-						
-						if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-								
-						if (device.platform === "iOS") {
-							dirEntry.setMetadata(onSetMetadataDirectorySuccess(dirEntry), onSetMetadataDirectoryFail, { "com.apple.MobileBackup": 1});
-						}
 								
 				} // close onGetDirectorySuccess
 
@@ -295,17 +254,7 @@
 
 				function onGetDirectorySuccess(dirEntry){
 								
-						if (device.platform === "Android") {
 							onSetMetadataDirectorySuccess(dirEntry);
-						}
-						
-						if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-								
-						if (device.platform === "iOS") {
-							dirEntry.setMetadata(onSetMetadataDirectorySuccess(dirEntry), onSetMetadataDirectoryFail, { "com.apple.MobileBackup": 1});
-						}
 								
 				} // close onGetDirectorySuccess
 
@@ -379,18 +328,8 @@
 
 				function onGetDirectorySuccess(dirEntry){
 
-								
-						if (device.platform === "Android") {
 							onSetMetadataDirectorySuccess(dirEntry);
-						}
-						
-						if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-								
-						if (device.platform === "iOS") {
-							dirEntry.setMetadata(onSetMetadataDirectorySuccess(dirEntry), onSetMetadataDirectoryFail, { "com.apple.MobileBackup": 1});
-						}
+
 								
 				} // close onGetDirectorySuccess
 
@@ -468,17 +407,8 @@
 					//MEMORIZZA PATH
 					var directory = dirEntry.fullPath;
 								
-						if (device.platform === "Android") {
 							onSetMetadataDirectorySuccess(dirEntry);
-						}
-						
-						if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-								
-						if (device.platform === "iOS") {
-							dirEntry.setMetadata(onSetMetadataDirectorySuccess(dirEntry), onSetMetadataDirectoryFail, { "com.apple.MobileBackup": 1});
-						}
+
 								
 				} // close onGetDirectorySuccess
 
@@ -503,17 +433,7 @@
 
 				function onGetFileSuccess(fileEntry){
 
-					if (device.platform === "iOS") {
-						fileEntry.setMetadata(onSetMetadataFileSuccess(fileEntry), onSetMetadataFileFail, { "com.apple.MobileBackup": 1});
-					}
-					
-					if (device.platform === "WinCE" || device.platform === "Win32NT") {
 							onSetMetadataFileSuccess(fileEntry);
-					}
-
-					if (device.platform === "Android") {
-						onSetMetadataFileSuccess(fileEntry);
-					}
 
 				} // close onGetFileSuccess
 
@@ -527,13 +447,7 @@
 									
 					fileEntry.getMetadata(function(metadata) {
 					
-					if (device.platform === "iOS" || device.platform === "Android") {
-						var dataDownload = Date.parse(metadata.modificationTime) / 1000;
-					}
-					
-					if (device.platform === "WinCE" || device.platform === "Win32NT") {
 						var dataDownload = Math.round(localStorage.getItem("lastDownload")/ 1000);
-					}
 					
 					
 					localStorage.setItem("dataDownload", dataDownload );
