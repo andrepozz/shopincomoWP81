@@ -748,8 +748,7 @@
 	function onBackKeyDown(e) {
 	e.preventDefault();
 	}
-	
-	document.addEventListener("deviceready", function(){
+
 	
 	$("h3.titoloDownloadFunzionalita").html(window.localStorage.getItem("downloadFunzionalita"));
 	
@@ -761,12 +760,12 @@
 	$("ul.downloadList").append($('<li class="sottocategorie"><img class="iconaTipologia" src="img/downloadSottocategorie.png"> DOWNLOAD '+window.localStorage.getItem("sottoCategorie")+'...<img src="img/download.gif"></li>'));
 	
 	var urlCategorie = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONcategorie.php?language="+codLingua+"");	
+				
+	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
+			
+		fileSystem.root.getDirectory("ShopInComo", {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
 		
 		var fileTransfer = new FileTransfer();
-			
-		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-			
-			fileSystem.root.getDirectory("ShopInComo", {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
 
 				function onGetDirectorySuccess(dirEntry){
 
@@ -785,7 +784,7 @@
 
 				function onGetDirectoryFail(){
 
-				console.log("Fail to get directory");
+				alert.log("Fail to get directory");
 
 				} // close onGetDirectoryFail
 
@@ -799,20 +798,20 @@
 
 				function onSetMetadataDirectoryFail(){
 
-				console.log("Fail to set metadata directory");
+				alert.log("Fail to set metadata directory");
 
 				} // close onSetMetadataDirectoryFail
 
 
 				function onGetFileSuccess(fileEntry){
 
-						onSetMetadataFileSuccess(fileEntry);
+				onSetMetadataFileSuccess(fileEntry);
 
 				} // close onGetFileSuccess
 
 				function onGetFileFail(){
 
-					console.log("Fail to get file");
+				alert.log("Fail to get file");
 
 				} // close onGetFileFail
 
@@ -1119,7 +1118,6 @@
 		
 	} //FUNCTION DOWNLOAD SOTTOCATEGORIE
 	
-	}, false);
 	
 	</script>
 	
