@@ -593,7 +593,7 @@
 		var fileLingue = JSON.parse(fileLingueJson);
 				
 			$.each(fileLingue, function(index, info) {
-			$("ul#listaLingue").append($("<li></li>",{"html":"<a href='#' class='lingua' id='" + info.idLingua + "' codiceLingua='"+info.codiceLingua+"' nomeLingua='"+index+"' data-transition='slide' ><img src='img/lingue/"+info.codiceLingua+".png' alt='Facebook' class='ui-li-icon ui-corner-none'>" + info.nomeLingua + "</a>" }));
+			$("ul#listaLingue").append($("<li></li>",{"html":"<a href='#setupCategorie' class='lingua' id='" + info.idLingua + "' codiceLingua='"+info.codiceLingua+"' nomeLingua='"+index+"' data-transition='slide' ><img src='img/lingue/"+info.codiceLingua+".png' class='ui-li-icon ui-corner-none'>" + info.nomeLingua + "</a>" }));
 			});
 	
 			$("ul#listaLingue").listview("refresh");
@@ -688,7 +688,7 @@
 	window.localStorage.setItem("aggiornamentiPopupDescrizione", lingue[lingua].aggiornamentiPopupDescrizione);
 	
 	// /TRADUZIONI----------------------------------------------------------------------------
-	$.mobile.changePage( "#setupCategorie", { allowSamePageTransition:true, transition: "slide" } );
+	//$.mobile.changePage( "#setupCategorie", { allowSamePageTransition:true, transition: "slide" } );
 	}
 	else
 	{
