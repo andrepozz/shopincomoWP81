@@ -749,6 +749,8 @@
 	e.preventDefault();
 	}
 	
+	document.addEventListener("deviceready", function(){
+	
 	$("h3.titoloDownloadFunzionalita").html(window.localStorage.getItem("downloadFunzionalita"));
 	
 	$("ul.downloadList").append($('<li class="'+window.localStorage.getItem("nomiEsercizi")+'"><img class="iconaTipologia" src="img/downloadnome.png"> DOWNLOAD '+window.localStorage.getItem("nomiEsercizi")+'... <img src="img/download.gif"></li>'));
@@ -1116,6 +1118,8 @@
 		}); // end of window.requestFileSystem
 		
 	} //FUNCTION DOWNLOAD SOTTOCATEGORIE
+	
+	}, false);
 	
 	</script>
 	
