@@ -58,7 +58,7 @@
 		
 	//CARICA JSON CATEGORIE
 	var path = window.localStorage.getItem("pathSD");
-	var jsonPath = path + "/brand.js";
+	var jsonPath = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONbrand.php");
 	
 		$( "#cerca_negozio" ).on( "filterablebeforefilter", function ( e, data ) {
 			var $ul = $( this ),
@@ -146,7 +146,7 @@
 	//CARICA JSON CATEGORIE
 		
 	var path = window.localStorage.getItem("pathSD");
-	var jsonPath = path + "/brandEsercizi.js";
+	var jsonPath = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONbrandEsercizi.php");
 	
 	$.ajax({
 	url: jsonPath,
@@ -381,7 +381,7 @@
 
 	<div data-role="header" data-position="fixed" data-tap-toggle="false">
 		<h1></h1>
-		<a href="#eserciziBrand" id="ritornoLista" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="#nomeEsercizi" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 	</div><!-- /header -->
 
@@ -403,25 +403,15 @@
 	$(".titoloNavigazione").html(window.localStorage.getItem("portamiQui"));
 	$(".didascaliaSocial").html(window.localStorage.getItem("votaNegozio"));
 	
-	if (device.platform === "iOS" || device.platform === "Android") {
-		$("ul.listaSocial").html("");
-		$("ul.listaSocial").append($('<li id="buttonFacebook"><a href="#" class="votaFacebook" idEsercizio=""><img id="votaFacebook" src="img/collegaFacebook.png"><h2>Facebook</h2><p class="didascaliaSocial"></p></a></li>'));
-		$("ul.listaSocial").append($('<li id="buttonFoursquare"><a href="#popupCheckin" data-rel="popup" class="votaFoursquare" idEsercizio=""><img id="votaFoursquare" src=""><h2>Foursquare</h2><p class="didascaliaSocial"></p></a></li>'));
-		$("ul.listaSocial").append($('<li id="buttonTwitter"><a href="#" class="votaTwitter" idEsercizio=""><img id="votaTwitter" src=""><h2>Twitter</h2><p class="didascaliaSocial"></p></a></li>'));
-		$("ul.listaSocial").listview("refresh");
-	}
-	
-	if (device.platform === "WinCE" || device.platform === "Win32NT") {
-		$("ul.listaSocial").html("");
-		$("ul.listaSocial").append($('<li id="buttonFoursquare"><a href="#popupCheckin" data-rel="popup" class="votaFoursquare" idEsercizio=""><img id="votaFoursquare" src=""><h2>Foursquare</h2><p class="didascaliaSocial"></p></a></li>'));
-		$("ul.listaSocial").append($('<li id="buttonTwitter"><a href="#" class="votaTwitter" idEsercizio=""><img id="votaTwitter" src=""><h2>Twitter</h2><p class="didascaliaSocial"></p></a></li>'));
-		$("ul.listaSocial").listview("refresh");
-	}
-
+	$("ul.listaSocial").html("");
+	$("ul.listaSocial").append($('<li id="buttonFoursquare"><a href="#popupCheckin" data-rel="popup" class="votaFoursquare" idEsercizio=""><img id="votaFoursquare" src=""><h2>Foursquare</h2><p class="didascaliaSocial"></p></a></li>'));
+	$("ul.listaSocial").append($('<li id="buttonTwitter"><a href="#" class="votaTwitter" idEsercizio=""><img id="votaTwitter" src=""><h2>Twitter</h2><p class="didascaliaSocial"></p></a></li>'));
+	$("ul.listaSocial").listview("refresh");
 	
 	// CARICA FILE VETRINA
 	var path = window.localStorage.getItem("pathSD");
-	var jsonPath = path + "/esercizi/"+idEsercizio+".js";
+	var codLingua = window.localStorage.getItem("codLingua");
+	var jsonPath = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+idEsercizio+"");	
 	//var jsonPath = "js/16.js";
 	var jsonVetrina;
 		
@@ -487,33 +477,7 @@
 		} //FINE DESCRIZIONE
 				
 		var	connectionStatus = navigator.onLine ? 'online' : 'offline';
-		
-		//FACEBOOK
-		if (device.platform === "iOS" || device.platform === "Android") {
-		FB.init({ appId: "771666006185274", nativeInterface: CDV.FB, useCachedDialogs: false });
-		//GET LOGIN STATUS
-		FB.getLoginStatus(function(response) {
-			//CONNESSO
-			if (response.status === 'connected' && connectionStatus == "online") {
-			$( "img#votaFacebook" ).attr('src', 'img/collegaFacebook.png');		
-			}
-			//APP NON AUTORIZZATA
-			else if (response.status === 'not_authorized' || connectionStatus == "offline") {
-			$( "img#votaFacebook" ).attr('src', 'img/collegaFacebook_bn.png');
-			var cnt = $("a.votaFacebook").contents();
-			$("a.votaFacebook").replaceWith(cnt);
-			$("ul.listaSocial").listview("refresh");
-			} 
-			//NON CONNESSO
-			else {
-			$( "img#votaFacebook" ).attr('src', 'img/collegaFacebook_bn.png');
-			var cnt = $("a.votaFacebook").contents();
-			$("a.votaFacebook").replaceWith(cnt);
-			$("ul.listaSocial").listview("refresh");
-			}
-		}, true);
-		}
-		
+				
 		//FOURSQUARE
 		var tokenFoursquare = window.localStorage.getItem("tokenFoursquare");
 		if (tokenFoursquare == null || connectionStatus == "offline") {
@@ -611,16 +575,10 @@
 		markerEsercizio = L.marker([esercizioLatitude, esercizioLongitude], {icon: markerIcon}).addTo(map).bindPopup(nomeEsercizioMappa);
 		
 		$(".distanzaEsercizio").html("");
-		
-		if (device.platform === "iOS" || device.platform === "Android") {
-			var options = { maximumAge: 1500, timeout: 10000, enableHighAccuracy: true };
-			watchID = navigator.geolocation.watchPosition(onSuccess, onErrorPosition, options);
-		}
-		
-		if (device.platform === "WinCE" || device.platform === "Win32NT") {
-			var options = { maximumAge: 1500, timeout: 30000, enableHighAccuracy: false };
-			watchID = navigator.geolocation.watchPosition(onSuccess, onErrorPosition, options);
-		}
+
+		var options = { maximumAge: 1500, timeout: 30000, enableHighAccuracy: false };
+		watchID = navigator.geolocation.watchPosition(onSuccess, onErrorPosition, options);
+
 		
 // FUNCTION SUCCESS WATCH POSITION
 
@@ -634,7 +592,7 @@
 			window.sessionStorage.setItem("userLongitude", userLongitude);
 				
 			var distanceVetrina = 5000;
-			var jsonPositionDir = path + "/position.js";
+			var jsonPositionDir = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONposition.php");
 			$.getJSON(jsonPositionDir, function( jsonPosition ) {
 				$.each(jsonPosition, function(index, info) {
 					currentDistanceVetrina = getDistanceFromLatLonInKm(userLatitude,userLongitude,info.latEsercizio,info.lonEsercizio);
@@ -692,14 +650,8 @@
 			}
 			if(error.code==3){
 				  // timeout
-				if (device.platform === "iOS" || device.platform === "Android") {
-					watchID = navigator.geolocation.watchPosition(onSuccess, onErrorPosition,{maximumAge: 1500, timeout: 20000, enableHighAccuracy : false});
-				}
-				
-				if (device.platform === "WinCE" || device.platform === "Win32NT") {
+
 					console.log("no position");
-				}
-				  
 			}
 			
 		}
@@ -720,12 +672,7 @@
 // CLICK DIRECTIONS
 	$(document).on("click", 'a.directions', function(){
 		geoPosition = $(this).attr('geoPosition');
-		if (device.platform === "Android") {
-			directions(geoPosition);
-		}
-		if (device.platform === "iOS") {
-			window.location.href = "maps:q="+geoPosition+"";
-		}
+			window.location.href = "maps:"+geoPosition+"";
 	});
 	
 // CLICK TRANSLATE GOOGLE
@@ -736,12 +683,6 @@
 		var urlTranslate = encodeURI("http://translate.google.com/#"+linguaDescrizione+"/"+codLingua+"/"+descrizioneTranslate+"");
 		var ref = window.open(urlTranslate, '_blank', 'location=yes');
 		//ref.addEventListener('loadstart', function() { alert(event.url); });
-	});
-	
-// CLICK BACK TO LISTA ESERCIZI
-	$(document).on("click", '#ritornoLista', function(){
-		ritorno = "ok";
-		window.sessionStorage.setItem("ritorno", ritorno);
 	});
 	
 // FUNZIONE DISTANZA NEAREST NODE
@@ -795,49 +736,12 @@
         return false;
     });
 		
-	$(document).on("click", '.votaFacebook', function(){
-	
-	idEsercizio = $("h3.nomeEsercizio").attr('idEsercizio');
-	latitudeFacebook = window.sessionStorage.getItem("userLatitude");
-	longitudeFacebook = window.sessionStorage.getItem("userLongitude");
-	nomeEsercizio = $("h3.nomeEsercizio").html();
-	var userFacebook = localStorage.getItem("idFacebook");
-	var descrizioneFacebook;
-	if (sessionStorage.getItem('descrizioneEsercizio') != null){ descrizioneFacebook = sessionStorage.getItem('descrizioneEsercizio')};
-	FB.ui(
-	{
-		method: 'feed',
-		name: $("h3.nomeEsercizio").html(),
-		link: 'http://shopincomo.comune.como.it/it/node/'+idEsercizio,
-		picture: 'http://shopincomo.comune.como.it/imgs/logoShopincomo.jpg',
-		caption: 'Shopincomo',
-		description: descrizioneFacebook
-	},
-	function(response) {
-		if (response) {
-			$.ajax({
-				type: 'POST',
-				url: 'http://shopincomo.comune.como.it/ccn20/votiSocial.php',
-				data: { idNegozio: idEsercizio, socialNetwork: 'Facebook', nomeNegozio: $("h3.nomeEsercizio").html(), latitude: latitudeFacebook, longitude: longitudeFacebook, idUtente: userFacebook}
-				}).done(function( msg ) {
-				//alert(window.localStorage.getItem("postPubblicato"));
-			});	
-		} 
-		else {
-		alert('Post was not published.');
-		}
-	}
-	);
-	
-	});
-	
 	$(document).on("click", '.votaFoursquare', function(){
 		
 		var latitude = window.sessionStorage.getItem("userLatitude");
 		var longitude = window.sessionStorage.getItem("userLongitude");
 		var nomeEsercizioFoursquare = $("h3.nomeEsercizio").html();
-		var tokenFoursquare = window.localStorage.getItem("tokenFoursquare");		
-									
+		var tokenFoursquare = window.localStorage.getItem("tokenFoursquare");							
 		$.getJSON('https://api.foursquare.com/v2/venues/search?ll='+latitude+','+longitude+'&limit=4&query='+nomeEsercizioFoursquare+'&radius=100&oauth_token='+tokenFoursquare+'&v=20140410',
 			function(data) {
 			venues = data.response.venues;
@@ -924,9 +828,10 @@
     });
 		
 	});
-		
-	</script>
 	
+	
+	
+	</script>
 	<ul data-role="listview" data-inset="true" style="background:fd613d" class="listaMappa">
     <li style="background:#fd613d">
 	<h3 class="nomeEsercizio" style="color:white; text-shadow:none"></h3>
@@ -990,7 +895,7 @@
 
 	<div data-role="header" data-position="fixed" data-tap-toggle="false">
 		<h1></h1>
-		<a href="#eserciziBrand" id="ritornoLista" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="#nomeEsercizi" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 	</div><!-- /header -->
 
@@ -1038,12 +943,6 @@
 	});
 	// /PAGEBEFORESHOW
 	
-	// CLICK BACK TO LISTA ESERCIZI
-	$(document).on("click", '#ritornoLista', function(){
-		ritorno = "ok";
-		window.sessionStorage.setItem("ritorno", ritorno);
-	});
-	
 	
 	</script>
 	
@@ -1076,7 +975,7 @@
 
 	<div data-role="header" data-position="fixed" data-tap-toggle="false">
 		<h1></h1>
-		<a href="#eserciziBrand" id="ritornoLista" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="#nomeEsercizi" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 	</div><!-- /header -->
 
@@ -1127,16 +1026,8 @@
 		var ref = window.open(urlTranslate, '_blank', 'location=yes');
 	});
 	
-	// CLICK BACK TO LISTA ESERCIZI
-	$(document).on("click", '#ritornoLista', function(){
-		ritorno = "ok";
-		window.sessionStorage.setItem("ritorno", ritorno);
-	});
-	
-	
-	
 	</script>
-	
+		
 	<!-- CONTATTI ESERCIZIO -->
 	<ul id="contattiEsercizio" data-role="listview" data-inset="true">
 	</ul>
@@ -1165,9 +1056,9 @@
 <!-- Start of page: #vetrinaStatistiche -->
 <div data-role="page" id="vetrinaStatistiche">
 
-	<div data-role="header">
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
 		<h1></h1>
-		<a href="#eserciziBrand" id="ritornoLista" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="#nomeEsercizi" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 	</div><!-- /header -->
 
@@ -1435,12 +1326,6 @@
 	
 	});
 	// /PAGEBEFORESHOW
-	
-	// CLICK BACK TO LISTA ESERCIZI
-	$(document).on("click", '#ritornoLista', function(){
-		ritorno = "ok";
-		window.sessionStorage.setItem("ritorno", ritorno);
-	});
 
 	</script>
 	

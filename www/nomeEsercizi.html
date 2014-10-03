@@ -146,7 +146,8 @@
 	
 	// CARICA FILE VETRINA
 	var path = window.localStorage.getItem("pathSD");
-	var jsonPath = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language=it&idEsercizio="+idEsercizio+"");	
+	var codLingua = window.localStorage.getItem("codLingua");
+	var jsonPath = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+idEsercizio+"");	
 	//var jsonPath = "js/16.js";
 	var jsonVetrina;
 		
