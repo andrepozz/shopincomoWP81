@@ -787,7 +787,7 @@
 	
 	$(document).on("click", 'a.foursquare', function(){
 	
-	var ref = window.open('https://foursquare.com/oauth2/authenticate?client_id=OEAMDK1KRKXV2ZMYSFC5GMV3WZRPNSXDPHTGOUHFKPQLQ0VH&response_type=token&redirect_uri=http://shopincomo.comune.como.it/ccn20/closeFoursquare.html', '_blank', 'location=no');
+	var ref = window.open('https://foursquare.com/oauth2/authenticate?client_id=OEAMDK1KRKXV2ZMYSFC5GMV3WZRPNSXDPHTGOUHFKPQLQ0VH&response_type=token&redirect_uri=http://shopincomo.comune.como.it/ccn20/closeFoursquare.html', '_blank', 'location=yes');
 	
 	ref.addEventListener('loadstart', function(event) {
     closeFoursquare(event.url,ref);
