@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, target-densitydpi=medium-dpi, user-scalable=0" />
+	<link rel="stylesheet" href="css/themes/shopincomo.min.css" />
+	<link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
+	<link rel="stylesheet" href="css/jquery.mobile.structure-1.4.2.min.css" />
+	
+	<link rel="stylesheet" href="css/template.css" />
+	
+	<script src="js/jquery-1.11.0.min.js"></script>
+	<script src="js/jquery.mobile-1.4.2.min.js"></script>
+	
+	<!-- cordova facebook plugin -->
+	<script src="cdv-plugin-fb-connect.js"></script>
+	<!-- facebook js sdk -->
+	<script src="facebook-js-sdk.js"></script>
+	
+	<script src="js/highcharts.js"></script>
+	<link rel="stylesheet" href="css/leaflet.css" />
+	<link rel="stylesheet" href="css/leaflet.usermarker.css" />
+	<link rel="stylesheet" href="css/vetrina.css" />
+	<script src="js/leaflet.js"></script>
+	<script src="js/leaflet.usermarker.js"></script>
+	<script src="js/function_checkConnection.js"></script>
+	<script type="text/javascript" src="cordova.js"></script>
+	
+	<title>Esercizi Vicini</title>
+	
+	<style>
+	.ui-listview li { 
+    margin: 2px;
+	}
+
+	.ui-listview {
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+	}
+	</style>
+	
+</head>
+<body>
+
+<!-- Start of page: #eserciziViciniMappa -->
+<div data-role="page" id="eserciziViciniMappa">
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+		<h1></h1>
+		<a href="index.html" rel="external" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+	</div><!-- /header -->
+
+	<div role="main" id="mapEsercizi" class="ui-content" >
+		
+	<script type="text/javascript" charset="utf-8">
+	
+	$( document ).on( "pageshow", "#eserciziViciniMappa", function() {
+	
+	document.addEventListener("backbutton", onBackKeyDown, false);
+		
+		function onBackKeyDown(e) {
+		e.preventDefault();
+		}
+	
+	
+	var screen = $.mobile.getScreenHeight();
+
+	var header = $(".ui-header").hasClass("ui-header-fixed") ? $(".ui-header").outerHeight()  - 1 : $(".ui-header").outerHeight();
+	var footer = $(".ui-footer").hasClass("ui-footer-fixed") ? $(".ui-footer").outerHeight() - 1 : $(".ui-footer").outerHeight();
+
+	/* content div has padding of 1em = 16px (32px top+bottom). This step
+	   can be skipped by subtracting 32px from content var directly. */
+	var contentCurrent = $(".ui-content").outerHeight() - $(".ui-content").height();
+
+	var content = screen - header - footer - contentCurrent;
+	$('#mapEsercizi').css('height', content);
+	 
+	var mapEsercizi;
+	var userLatitudeVicini;
+	var userLongitudeVicini;
+	var userAccuracyVicini;
+	var circle;
+	var maxDistance;
+	var markersVicini;
+	var markerUtente;
+	var group;
+	var markerEsercizio;
+	var eserciziSort;
+	var markerIcon = L.icon({
+		iconUrl: 'img/marker-icon.png',
+		iconSize:     [30, 41], // size of the icon
+		popupAnchor:  [0, -20] // point from which the popup should open relative to the iconAnchor
+	});
+	
+	//INIZIALIZZA MAPPA
+	
+		mapEsercizi = new L.Map('mapEsercizi');
+		mapEsercizi.dragging.disable();
+		mapEsercizi.attributionControl.setPrefix("Leaflet");
+		//var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+		//L.tileLayer(osmUrl, {minZoom: 13, maxZoom: 18}).addTo(mapEsercizi);
+		
+		L.tileLayer('img/como/{z}/{x}/{y}.jpg', {minZoom: 15, maxZoom: 18}).addTo(mapEsercizi);
+
+	
+	//BOTTONI CONTROLLO ZOOM
+		var controlloDistance = L.control({ position: 'topright' });
+			controlloDistance.onAdd = function (mapEsercizi) {
+				this._div = L.DomUtil.create('div', 'controlloDistance');
+				this._div.innerHTML = '<button class="circleDistance" circleDistance="100"><img src="img/100m.png">100m</button><button class="circleDistance" circleDistance="200"><img src="img/200m.png">200m</button><button class="circleDistance" circleDistance="300"><img src="img/300m.png">300m</button>';
+				return this._div;
+			};
+		
+		controlloDistance.addTo(mapEsercizi);	
+	
+	//CARICA JSON POSITION
+	var path = window.localStorage.getItem("pathSD");
+	var jsonPositionDir = path + "/position.js";
+	//var jsonPositionDir = "js/position.js";
+			
+	//CHECK GEOLOCATION
+	if(window.sessionStorage.getItem("userLatitude") == null) {
+	
+	$.mobile.loading( "show", {
+        text: ""+window.localStorage.getItem("localizzando")+"",
+        textVisible: true,
+        theme: "b",
+        textonly: false
+	});
+	
+	var options = { maximumAge: 1500, timeout: 10000, enableHighAccuracy: true };
+	
+	navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
+	
+	function onSuccess(position) {
+	$.mobile.loading( "hide" );
+	var userLatitude = position.coords.latitude;
+    var userLongitude = position.coords.longitude;
+	var userAccuracy = position.coords.accuracy;
+		
+	window.sessionStorage.setItem("userLatitude", userLatitude);
+	window.sessionStorage.setItem("userLongitude", userLongitude);
+	window.sessionStorage.setItem("userAccuracy", userAccuracy);
+	
+		$.getJSON(jsonPositionDir, function( jsonPosition ) {
+	
+		userLatitudeVicini = window.sessionStorage.getItem("userLatitude");
+		userLongitudeVicini = window.sessionStorage.getItem("userLongitude");
+		userAccuracyVicini = window.sessionStorage.getItem("userAccuracy");
+	
+		$('a.lista').attr('userLatitudeVicini', userLatitudeVicini);
+		$('a.lista').attr('userLongitudeVicini', userLongitudeVicini);
+	
+		var eserciziVicini = [];
+		
+		//NEAREST NODE
+		$.each(jsonPosition, function(index, info) {
+
+			var currentDistance;
+			var currentEsercizio;
+			
+			if(!maxDistance){
+			maxDistance = 200;
+			$('a.lista').attr('maxDistance', maxDistance);
+			}
+			$('a.lista').attr('maxDistance', maxDistance);
+			
+			currentDistance = getDistanceFromLatLonInKm(userLatitudeVicini, userLongitudeVicini, info.latEsercizio, info.lonEsercizio);
+			currentEsercizio = info.idEsercizio;
+			
+				if(currentDistance < maxDistance) {
+				
+				var time = Math.round(parseInt(currentDistance)/(1.4)/60);
+				
+				eserciziVicini.push({
+				idEsercizio: info.idEsercizio,
+				nomeEsercizio: info.nomeEsercizio,
+				latEsercizio: info.latEsercizio,
+				lonEsercizio: info.lonEsercizio,
+				idCategoria: info.idCategoria,
+				distance: currentDistance,
+				time: time
+				});
+				}
+		});
+		
+		eserciziSort = eserciziVicini.sort(function(a,b) { return parseInt(a.distance) - parseInt(b.distance) } );
+		
+		
+		
+		if(!markersVicini){
+		markersVicini = new L.FeatureGroup();
+		}
+		else
+		{
+		mapEsercizi.removeLayer(markersVicini);
+		}
+		
+		$.each(eserciziSort, function(index, info) {
+		markerEsercizio = L.marker([info.latEsercizio, info.lonEsercizio], {icon: markerIcon}).bindPopup(info.nomeEsercizio);
+		markersVicini.addLayer(markerEsercizio);
+		});
+		
+		mapEsercizi.addLayer(markersVicini);
+	
+		if (!markerUtente) {
+		markerUtente = L.userMarker([userLatitudeVicini, userLongitudeVicini],{pulsing:true}).bindPopup("Sei qui.").addTo(mapEsercizi);
+		markerUtente.setAccuracy(userAccuracyVicini);
+		circle = L.circle([userLatitudeVicini, userLongitudeVicini], maxDistance, {
+		color: '#008000',
+		fillColor: '#008000',
+		fillOpacity: 0.5
+		}).addTo(mapEsercizi);
+		//ADATTA LA MAPPA
+		group = new L.featureGroup([markersVicini, markerUtente, circle]);
+		}
+	
+		//UPDATE POSIZIONE UTENTE
+		markerUtente.setLatLng([userLatitudeVicini, userLongitudeVicini],{pulsing:true}).update();
+		circleDistance = $(this).attr('circleDistance');
+		circle.setLatLng([userLatitudeVicini, userLongitudeVicini]);
+		circle.setRadius(parseInt(maxDistance)+15);
+		circle.setStyle({color: '#008000', fillColor: '#008000'})
+		circle.redraw();
+	
+		//RAGGRUPPA MARKER
+		group = new L.featureGroup([markersVicini, markerUtente, circle]);
+		mapEsercizi.fitBounds(group.getBounds().pad(0.15));
+	
+	
+	}); // FINE GET JSON POSITION
+	
+	
+    } // END ON SUCCESS
+	
+	function onError(error) {
+        if(error.code==1){
+             // user said no!
+        }
+        if(error.code==2){
+             // position unavailable
+        }
+        if(error.code==3){
+              // timeout
+              navigator.geolocation.getCurrentPosition(onSuccess, onError,{maximumAge: 1500, timeout: 20000, enableHighAccuracy : false});
+        }
+    }
+
+	
+	} // END CHECK UPDATE
+	else
+	{
+	
+	$.getJSON(jsonPositionDir, function( jsonPosition ) {
+
+		userLatitudeVicini = window.sessionStorage.getItem("userLatitude");
+		userLongitudeVicini = window.sessionStorage.getItem("userLongitude");
+		userAccuracyVicini = window.sessionStorage.getItem("userAccuracy");
+		
+		$('a.lista').attr('userLatitudeVicini', userLatitudeVicini);
+		$('a.lista').attr('userLongitudeVicini', userLongitudeVicini);
+	
+		var eserciziVicini = [];
+		
+		//NEAREST NODE
+		$.each(jsonPosition, function(index, info) {
+
+			var currentDistance;
+			var currentEsercizio;
+			
+			if(!maxDistance){
+			maxDistance = 200;
+			$('a.lista').attr('maxDistance', maxDistance);
+			}
+			$('a.lista').attr('maxDistance', maxDistance);
+			
+			currentDistance = getDistanceFromLatLonInKm(userLatitudeVicini, userLongitudeVicini, info.latEsercizio, info.lonEsercizio);
+			currentEsercizio = info.idEsercizio;
+			
+				if(currentDistance < maxDistance) {
+				
+				var time = Math.round(parseInt(currentDistance)/(1.4)/60);
+				
+				eserciziVicini.push({
+				idEsercizio: info.idEsercizio,
+				nomeEsercizio: info.nomeEsercizio,
+				latEsercizio: info.latEsercizio,
+				lonEsercizio: info.lonEsercizio,
+				idCategoria: info.idCategoria,
+				distance: currentDistance,
+				time: time
+				});
+				}
+		});
+		
+		eserciziSort = eserciziVicini.sort(function(a,b) { return parseInt(a.distance) - parseInt(b.distance) } );
+		
+		
+		
+		if(!markersVicini){
+		markersVicini = new L.FeatureGroup();
+		}
+		else
+		{
+		mapEsercizi.removeLayer(markersVicini);
+		}
+		
+		$.each(eserciziSort, function(index, info) {
+		markerEsercizio = L.marker([info.latEsercizio, info.lonEsercizio], {icon: markerIcon}).bindPopup(info.nomeEsercizio);
+		markersVicini.addLayer(markerEsercizio);
+		});
+		
+		mapEsercizi.addLayer(markersVicini);
+	
+		if (!markerUtente) {
+		markerUtente = L.userMarker([userLatitudeVicini, userLongitudeVicini],{pulsing:true}).bindPopup("Sei qui.").addTo(mapEsercizi);
+		markerUtente.setAccuracy(userAccuracyVicini);
+		circle = L.circle([userLatitudeVicini, userLongitudeVicini], maxDistance, {
+		color: '#008000',
+		fillColor: '#008000',
+		fillOpacity: 0.5
+		}).addTo(mapEsercizi);
+		//ADATTA LA MAPPA
+		group = new L.featureGroup([markersVicini, markerUtente, circle]);
+		}
+	
+		//UPDATE POSIZIONE UTENTE
+		markerUtente.setLatLng([userLatitudeVicini, userLongitudeVicini],{pulsing:true}).update();
+		circleDistance = $(this).attr('circleDistance');
+		circle.setLatLng([userLatitudeVicini, userLongitudeVicini]);
+		circle.setRadius(parseInt(maxDistance)+15);
+		circle.setStyle({color: '#008000', fillColor: '#008000'})
+		circle.redraw();
+	
+		//RAGGRUPPA MARKER
+		group = new L.featureGroup([markersVicini, markerUtente, circle]);
+		mapEsercizi.fitBounds(group.getBounds().pad(0.15));
+	
+	
+	}); // FINE GET JSON POSITION
+	
+	}// END ELSE GEOLOCATION
+		
+		
+	// CLICK ZOOM BUTTONS
+	
+	$(document).on("click", 'button.circleDistance', function(){
+		
+		
+		mapEsercizi.removeLayer(markersVicini);
+		
+		circleDistance = $(this).attr('circleDistance');
+		$('a.lista').attr('maxDistance', circleDistance);
+		//CARICA JSON POSITION
+		var path = window.localStorage.getItem("pathSD");
+		var jsonPositionDir = path + "/position.js";
+		//var jsonPositionDir = "js/position.js";
+		$.getJSON(jsonPositionDir, function( jsonPosition ) {
+		
+		userLatitudeVicini = window.sessionStorage.getItem("userLatitude");
+		userLongitudeVicini = window.sessionStorage.getItem("userLongitude");
+		userAccuracyVicini = window.sessionStorage.getItem("userAccuracy");
+
+		var eserciziVicini = [];
+		
+			//NEAREST NODE
+			$.each(jsonPosition, function(index, info) {
+
+			var currentDistance;
+			var currentEsercizio;
+
+			currentDistance = getDistanceFromLatLonInKm(userLatitudeVicini, userLongitudeVicini, info.latEsercizio, info.lonEsercizio);
+			currentEsercizio = info.idEsercizio;
+				if(currentDistance < circleDistance) {
+				
+				var time = Math.round(parseInt(currentDistance)/(1.4)/60);
+				
+				eserciziVicini.push({
+				idEsercizio: info.idEsercizio,
+				nomeEsercizio: info.nomeEsercizio,
+				latEsercizio: info.latEsercizio,
+				lonEsercizio: info.lonEsercizio,
+				idCategoria: info.idCategoria,
+				distance: currentDistance,
+				time: time
+				});
+				}
+			});
+			
+			eserciziSort = eserciziVicini.sort(function(a,b) { return parseInt(a.distance) - parseInt(b.distance) } );
+			
+						
+			markersVicini = new L.FeatureGroup();
+			$.each(eserciziSort, function(index, info) {
+			markerEsercizio = L.marker([info.latEsercizio, info.lonEsercizio], {icon: markerIcon}).bindPopup(info.nomeEsercizio);
+			markersVicini.addLayer(markerEsercizio);
+			});
+			mapEsercizi.addLayer(markersVicini);
+			
+			//SET ICONA UTENTE
+			if (!markerUtente) {
+			markerUtente = L.userMarker([userLatitudeVicini, userLongitudeVicini],{pulsing:true}).bindPopup("Sei qui.").addTo(mapEsercizi);
+			markerUtente.setAccuracy(userAccuracyVicini);
+			circle = L.circle([userLatitudeVicini, userLongitudeVicini], maxDistance, {
+			color: '#008000',
+			fillColor: '#008000',
+			fillOpacity: 0.3
+			}).addTo(mapEsercizi);
+			
+			//ADATTA LA MAPPA
+			group = new L.featureGroup([markersVicini, markerUtente, circle]);
+			}
+			
+			//UPDATE POSIZIONE UTENTE
+			markerUtente.setLatLng([userLatitudeVicini, userLongitudeVicini],{pulsing:true}).update();
+			
+			
+			circle.setLatLng([userLatitudeVicini, userLongitudeVicini]);
+			circle.setRadius(parseInt(circleDistance)+15);
+			circle.setStyle({color: '#008000', fillColor: '#008000'})
+			circle.redraw();
+			
+			
+			group = new L.featureGroup([markersVicini, markerUtente, circle]);
+			mapEsercizi.fitBounds(group.getBounds().pad(0.15));
+			
+		
+		}); // FINE GET JSON POSITION
+		
+	}); // FINE ONCLICK CIRCLE DISTANCE
+	
+	}); // FINE PAGESHOW
+	
+	function getRealContentHeight() {
+    var header = $.mobile.activePage.find("div[data-role='header']:visible");
+    var footer = $.mobile.activePage.find("div[data-role='footer']:visible");
+    var content = $.mobile.activePage.find("div[data-role='content']:visible:visible");
+    var viewport_height = $(window).height();
+
+    var content_height = viewport_height - header.outerHeight() - footer.outerHeight();
+    if((content.outerHeight() - header.outerHeight() - footer.outerHeight()) <= viewport_height) {
+        content_height -= (content.outerHeight() - content.height());
+    } 
+    return content_height;
+	}
+	
+	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+  
+		var R = 6371; // Radius of the earth in km
+  
+		var dLat = deg2rad(lat2-lat1);  // deg2rad below
+		var dLon = deg2rad(lon2-lon1); 
+  
+		var a = 
+		Math.sin(dLat/2) * Math.sin(dLat/2) +
+		Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+		Math.sin(dLon/2) * Math.sin(dLon/2)
+		; 
+  
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		var d = R * c * 1000; // Distance in km
+		return Math.round(d);
+	}
+
+	function deg2rad(deg) {
+	
+	return deg * (Math.PI/180)
+	}
+	
+	$(document).on("click", 'a.lista', function(){
+		userLatitudeVicini = $(this).attr('userLatitudeVicini');
+		userLongitudeVicini = $(this).attr('userLongitudeVicini');
+		maxDistance = $(this).attr('maxDistance');
+	});
+	
+	
+	
+	</script>
+	
+	</div><!-- /content -->
+
+	<!-- FOOTER -->
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false">
+	<!-- NAVBAR -->
+		<div data-role="navbar">
+		<ul>
+			<li><a href="#" class="ui-btn-active ui-state-persist"><img src="img/map.png"></a></li>
+			<li class="elencoNegozi"><a href="#eserciziViciniLista" class="lista" data-transition="slide"><img src="img/list.png"></a></li>
+		</ul>
+		</div>
+	<!-- /NAVBAR -->
+	</div>
+	<!-- /FOOTER -->
+	
+</div><!-- /page eserciziViciniMappa -->
+
+<!-- Start of page: #eserciziViciniLista -->
+<div data-role="page" id="eserciziViciniLista">
+
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+		<h1></h1>
+		<a href="#eserciziViciniMappa" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" >
+	
+	<script>
+	
+	$( document ).on( "pagebeforeshow", "#eserciziViciniLista", function() {
+		
+	var latUser = window.sessionStorage.getItem("userLatitude");
+	var lonUser = window.sessionStorage.getItem("userLongitude");
+	//CARICA JSON POSITION
+	var path = window.localStorage.getItem("pathSD");
+	var jsonPositionDir = path + "/position.js";
+	//var jsonPositionDir = "js/position.js";
+	$.getJSON(jsonPositionDir, function( jsonPosition ) {
+	
+	var eserciziVicini = [];
+	
+		//NEAREST NODE
+		$.each(jsonPosition, function(index, info) {
+		
+		var currentDistance;
+		var currentEsercizio;
+		
+		currentDistance = getDistanceFromLatLonInKm(latUser, lonUser, info.latEsercizio, info.lonEsercizio);
+		currentEsercizio = info.idEsercizio;
+		
+			if(currentDistance < maxDistance) {
+			
+			var time = Math.round(parseInt(currentDistance)/(1.4)/60);
+			
+			eserciziVicini.push({
+			idEsercizio: info.idEsercizio,
+			nomeEsercizio: info.nomeEsercizio,
+			idCategoria: info.idCategoria,
+			distance: currentDistance,
+			time: time
+			});
+			}
+		});
+		
+		var eserciziSort = eserciziVicini.sort(function(a,b) { return parseInt(a.distance) - parseInt(b.distance) } );
+		
+			$("p.noResult").html("");
+			if(eserciziSort.length == 0){
+			$("p.noResult").html(""+window.localStorage.getItem("noRisultatiVicini")+"");
+			}
+		
+		$("ul#listaEsercizi").html("");
+				
+		$.each(eserciziSort, function(index, info) {
+		if(info.idCategoria > 1644 || info.idCategoria == undefined){idCategoriaIcon = "other.png";}
+		else{idCategoriaIcon = ""+info.idCategoria+".png";}
+		$("ul#listaEsercizi").append($("<li></li>",{"html":"<a href='#vetrinaMappa' class='esercizio' idEsercizio='" + info.idEsercizio + "' data-transition='slide' ><img src='img/categorie/"+idCategoriaIcon+"'><h2>"+info.nomeEsercizio+"</h2><p><img src='img/tempoVicini.png'> "+info.distance+" m</p></a>" }));
+		});
+		
+		$("ul#listaEsercizi").listview().listview('refresh');
+	
+	}); // FINE GET JSON POSITION
+	
+	}); 
+	
+	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+  
+		var R = 6371; // Radius of the earth in km
+  
+		var dLat = deg2rad(lat2-lat1);  // deg2rad below
+		var dLon = deg2rad(lon2-lon1); 
+  
+		var a = 
+		Math.sin(dLat/2) * Math.sin(dLat/2) +
+		Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+		Math.sin(dLon/2) * Math.sin(dLon/2)
+		; 
+  
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		var d = R * c * 1000; // Distance in km
+		return Math.round(d);
+	}
+
+	function deg2rad(deg) {
+	
+	return deg * (Math.PI/180)
+	}
+	
+	$(document).on("click", 'a.esercizio', function(){
+		idEsercizio = $(this).attr('idEsercizio');
+	});
+	
+	</script>
+		
+	<ul data-role="listview" id="listaEsercizi" data-inset="true">
+	</ul>
+	<p class="noResult"></p>
+	
+	</div><!-- /content -->
+
+	<!-- FOOTER -->
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false">
+	<!-- NAVBAR -->
+		<div data-role="navbar">
+			<ul>
+			<li><a href="#eserciziViciniMappa" data-transition="slide" data-direction="reverse"><img src="img/map.png"></a></li>
+			<li><a href="#" class="ui-btn-active ui-state-persist"><img src="img/list.png"></a></li>
+		</ul>
+		</div>
+	<!-- /NAVBAR -->
+	</div>
+	<!-- /FOOTER -->
+</div><!-- /page eserciziViciniLista -->
+
+<!-- Start of page: #vetrinaMappa -->
+<div data-role="page" id="vetrinaMappa">
+
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+		<h1></h1>
+		<a href="#eserciziViciniMappa" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" >
+		
+	
+	<script type="text/javascript" charset="utf-8">
+	
+
+	$( document ).on( "pageshow", "#vetrinaMappa", function() {
+	
+	//PREVENT BACK BUTTON
+	document.addEventListener("backbutton", onBackKeyDown, false);
+		
+	function onBackKeyDown(e) {
+	e.preventDefault();
+	}
+	
+	$(".titoloNavigazione").html(window.localStorage.getItem("portamiQui"));
+	$(".didascaliaSocial").html(window.localStorage.getItem("votaNegozio"));
+	
+	if (device.platform === "iOS" || device.platform === "Android") {
+		$("ul.listaSocial").html("");
+		$("ul.listaSocial").append($('<li id="buttonFacebook"><a href="#" class="votaFacebook" idEsercizio=""><img id="votaFacebook" src="img/collegaFacebook.png"><h2>Facebook</h2><p class="didascaliaSocial"></p></a></li>'));
+		$("ul.listaSocial").append($('<li id="buttonFoursquare"><a href="#popupCheckin" data-rel="popup" class="votaFoursquare" idEsercizio=""><img id="votaFoursquare" src=""><h2>Foursquare</h2><p class="didascaliaSocial"></p></a></li>'));
+		$("ul.listaSocial").append($('<li id="buttonTwitter"><a href="#" class="votaTwitter" idEsercizio=""><img id="votaTwitter" src=""><h2>Twitter</h2><p class="didascaliaSocial"></p></a></li>'));
+		$("ul.listaSocial").listview("refresh");
+	}
+	
+	if (device.platform === "WinCE" || device.platform === "Win32NT") {
+		$("ul.listaSocial").html("");
+		$("ul.listaSocial").append($('<li id="buttonFoursquare"><a href="#popupCheckin" data-rel="popup" class="votaFoursquare" idEsercizio=""><img id="votaFoursquare" src=""><h2>Foursquare</h2><p class="didascaliaSocial"></p></a></li>'));
+		$("ul.listaSocial").append($('<li id="buttonTwitter"><a href="#" class="votaTwitter" idEsercizio=""><img id="votaTwitter" src=""><h2>Twitter</h2><p class="didascaliaSocial"></p></a></li>'));
+		$("ul.listaSocial").listview("refresh");
+	}
+
+	
+	// CARICA FILE VETRINA
+	var path = window.localStorage.getItem("pathSD");
+	var jsonPath = path + "/esercizi/"+idEsercizio+".js";
+	//var jsonPath = "js/16.js";
+	var jsonVetrina;
+		
+	$.ajax({
+		url: jsonPath,
+		dataType: 'json',
+		async: false,
+		success: function(data) {
+		jsonVetrina = data;
+		sessionStorage.setItem('jsonVetrina', JSON.stringify(jsonVetrina));
+		}
+	}); // ajax
+	
+	// NOME ESERCIZIO + INDIRIZZO + DESCRIZIONE
+	var esercizioLatitude;
+	var esercizioLongitude;
+	var nomeEsercizioMappa;
+	var descrizioneEsercizio;
+	var descrizioneEsercizioShowMore;
+	var linguaDescrizioneEsercizio;
+	var map;
+	
+	$( "#map" ).remove();
+	var $map = $("<div>", {id: "map", class: "a", style:"width: 1920px; height:200px"});
+	$("#mappa").append($map);
+	
+	$.each(jsonVetrina, function(index, info) {
+		$("h3.nomeEsercizio").html(info.NomeEsercizio);
+		$("h3.nomeEsercizio").attr('idEsercizio', info.idEsercizio);
+		$("p.indirizzoEsercizio").html(info.Indirizzo+" "+info.Citta);
+		
+		esercizioLatitude = info.Latitudine;
+		esercizioLongitude = info.Longitudine;
+		nomeEsercizioMappa = info.NomeEsercizio;
+		
+		$(".descrizioneEsercizio").html(""); // SVUOTA DESCRIZIONE PER PREVENIRE DESCRIZIONI NULLE
+		$(".brandEsercizio").html(""); // SVUOTA BRAND PER PREVENIRE BRAND NULLI
+		
+		if (info.Brand != undefined) {
+		$(".brandEsercizio").html(info.Brand.join(", "));
+		} //FINE BRAND
+		
+		sessionStorage.removeItem('descrizioneEsercizio');
+		if (info.Descrizione != undefined) {
+			$(".descrizioneEsercizio").html(info.Descrizione);
+			descrizioneEsercizio = info.Descrizione;
+			sessionStorage.setItem('descrizioneEsercizio', info.Descrizione);
+			linguaDescrizioneEsercizio = info.LinguaDescrizione;
+			descrizioneEsercizioShowMore = info.Descrizione;
+			var maxCharacters = 50;
+			var ellipsestext = "...";
+			var moretext = ""+window.localStorage.getItem("mostra")+"";
+			var lesstext = ""+window.localStorage.getItem("nascondi")+"";
+			$('.showDescrizione').each(function() {
+			
+				if(descrizioneEsercizioShowMore.length > maxCharacters) {
+					var minText = descrizioneEsercizioShowMore.substr(0, maxCharacters);
+					var allText = descrizioneEsercizioShowMore.substr(maxCharacters, descrizioneEsercizioShowMore.length - maxCharacters);
+					var descrizioneShow = minText + '<span class="moreellipses">' + ellipsestext+ '&nbsp;</span><span class="morecontent"><span>' + allText + '</span>&nbsp;&nbsp;<a href="#" class="morelink">' + moretext + '</a></span>';
+					$(this).html(descrizioneShow);
+				}
+			});
+		} //FINE DESCRIZIONE
+				
+		var	connectionStatus = navigator.onLine ? 'online' : 'offline';
+		
+		//FACEBOOK
+		if (device.platform === "iOS" || device.platform === "Android") {
+		FB.init({ appId: "771666006185274", nativeInterface: CDV.FB, useCachedDialogs: false });
+		//GET LOGIN STATUS
+		FB.getLoginStatus(function(response) {
+			//CONNESSO
+			if (response.status === 'connected' && connectionStatus == "online") {
+			$( "img#votaFacebook" ).attr('src', 'img/collegaFacebook.png');		
+			}
+			//APP NON AUTORIZZATA
+			else if (response.status === 'not_authorized' || connectionStatus == "offline") {
+			$( "img#votaFacebook" ).attr('src', 'img/collegaFacebook_bn.png');
+			var cnt = $("a.votaFacebook").contents();
+			$("a.votaFacebook").replaceWith(cnt);
+			$("ul.listaSocial").listview("refresh");
+			} 
+			//NON CONNESSO
+			else {
+			$( "img#votaFacebook" ).attr('src', 'img/collegaFacebook_bn.png');
+			var cnt = $("a.votaFacebook").contents();
+			$("a.votaFacebook").replaceWith(cnt);
+			$("ul.listaSocial").listview("refresh");
+			}
+		}, true);
+		}
+		
+		//FOURSQUARE
+		var tokenFoursquare = window.localStorage.getItem("tokenFoursquare");
+		if (tokenFoursquare == null || connectionStatus == "offline") {
+		$( "img#votaFoursquare" ).attr('src', 'img/collegaFoursquare_bn.png');
+		var cnt = $("a.votaFoursquare").contents();
+		$("a.votaFoursquare").replaceWith(cnt);
+		$("ul.listaSocial").listview("refresh");
+		}
+		else {
+		$( "img#votaFoursquare" ).attr('src', 'img/collegaFoursquare.png');
+		}
+		
+		//TWITTER
+		var twitterToken = window.localStorage.getItem("twitterToken");
+		if (twitterToken == null || connectionStatus == "offline") {
+		$( "img#votaTwitter" ).attr('src', 'img/collegaTwitter_bn.png');
+		var cnt = $("a.votaTwitter").contents();
+		$("a.votaTwitter").replaceWith(cnt);
+		$("ul.listaSocial").listview("refresh");
+		}
+		else {
+		$( "img#votaTwitter" ).attr('src', 'img/collegaTwitter.png');
+		}
+		
+		if (info.Parcheggio == undefined) {
+		$( "h2.nomeParcheggioVicino" ).html("");
+		$( "p.indirizzoParcheggioVicino" ).html("");
+		$( "h2.nomeParcheggioVicino" ).html("-");
+		$( "p.indirizzoParcheggioVicino" ).html("-");
+		}
+		else{
+		$( "h2.nomeParcheggioVicino" ).html("");
+		$( "p.indirizzoParcheggioVicino" ).html("");
+		$( "h2.nomeParcheggioVicino" ).html(info.Parcheggio.nomeParcheggio);
+		$( "p.indirizzoParcheggioVicino" ).html(info.Parcheggio.indirizzoParcheggio);
+		}
+	});
+		
+//NAVIGATE BUTTON
+
+		$( ".directions" ).attr('geoPosition', parseFloat(esercizioLatitude).toFixed(5)+","+parseFloat(esercizioLongitude).toFixed(5));
+		
+// DESCRIZIONE + TRANSLATE BUTTON
+		var codLingua = localStorage.getItem("codLingua");
+		if(!(codLingua == 'it' || codLingua == 'en')){
+			if(descrizioneEsercizio != undefined)
+			{
+			$( ".descrizioneEsercizio" ).show();
+			$( ".traduciDescrizioneEsercizio" ).html("");
+			$( ".traduciDescrizioneEsercizio" ).html( "<a class='translate ui-btn ui-mini ui-btn-inline' codLingua='"+codLingua+"' linguaDescrizione='"+linguaDescrizioneEsercizio+"'>Translate</a>" );	
+			}
+			else{
+			$( ".descrizioneEsercizio" ).hide();
+			}
+		}
+		
+// MAPPA + POSIZIONE UTENTE
+	
+		//INIZIALIZZAZIONE MAPPA
+		
+		map = new L.Map('map');
+		map.dragging.disable();
+		map.attributionControl.setPrefix("Leaflet");
+		//var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+		//L.tileLayer(osmUrl, {minZoom: 13, maxZoom: 18}).addTo(map);
+		
+		L.tileLayer('img/como/{z}/{x}/{y}.jpg', {minZoom: 15, maxZoom: 18}).addTo(map);
+		
+		map.setView(new L.LatLng(esercizioLatitude, esercizioLongitude),16); //MAPPA SU COMO
+		
+		//BOTTONI CONTROLLO ZOOM
+		var controlloZoom = L.control({ position: 'bottomleft' });
+		controlloZoom.onAdd = function (map) {
+			this._div = L.DomUtil.create('div', 'controlloZoom');
+			this._div.innerHTML = '<button class="groupMarker"><img src="img/userShop.png"></button><button class="userMarker"><img src="img/loadPosition.gif"></button>';
+			return this._div;
+		};
+		controlloZoom.addTo(map);
+		
+		
+		var userLatitude;
+		var userLongitude;
+		var markerUtente;
+		var markerEsercizio;
+		var group;
+		var watchID = null;
+		var options = { maximumAge: 1500, timeout: 10000, enableHighAccuracy: true };
+      		
+		var markerIcon = L.icon({
+			iconUrl: 'img/marker-icon.png',
+			iconSize:     [30, 41], // size of the icon
+			popupAnchor:  [0, -20] // point from which the popup should open relative to the iconAnchor
+		});
+		
+		markerEsercizio = L.marker([esercizioLatitude, esercizioLongitude], {icon: markerIcon}).addTo(map).bindPopup(nomeEsercizioMappa);
+		
+		$(".distanzaEsercizio").html("");
+		
+		if (device.platform === "iOS" || device.platform === "Android") {
+			var options = { maximumAge: 1500, timeout: 10000, enableHighAccuracy: true };
+			watchID = navigator.geolocation.watchPosition(onSuccess, onErrorPosition, options);
+		}
+		
+		if (device.platform === "WinCE" || device.platform === "Win32NT") {
+			var options = { maximumAge: 1500, timeout: 30000, enableHighAccuracy: false };
+			watchID = navigator.geolocation.watchPosition(onSuccess, onErrorPosition, options);
+		}
+		
+// FUNCTION SUCCESS WATCH POSITION
+
+		function onSuccess(position) {
+			
+			$("button.userMarker").html("<img src='img/userPosition.png'>");
+			
+			userLatitude = position.coords.latitude;
+			userLongitude = position.coords.longitude;
+			window.sessionStorage.setItem("userLatitude", userLatitude);
+			window.sessionStorage.setItem("userLongitude", userLongitude);
+				
+			var distanceVetrina = 5000;
+			var jsonPositionDir = path + "/position.js";
+			$.getJSON(jsonPositionDir, function( jsonPosition ) {
+				$.each(jsonPosition, function(index, info) {
+					currentDistanceVetrina = getDistanceFromLatLonInKm(userLatitude,userLongitude,info.latEsercizio,info.lonEsercizio);
+					if(distanceVetrina > currentDistanceVetrina)
+					{
+						distanceVetrina = currentDistanceVetrina;
+						nearestEsercizio = info.idEsercizio;
+					}
+				});
+				console.log("Nodo vicino: "+nearestEsercizio);
+				console.log(distanceVetrina);
+				if(distanceVetrina < 50)
+				{				
+					var jsonVetrinaSession = JSON.parse(window.sessionStorage.getItem("jsonVetrina"));
+					var obj = jsonVetrinaSession[0];
+						if(nearestEsercizio in obj.Distanze){
+						
+								$.each(obj.Distanze, function(index, infoDistance) {
+									if(infoDistance.idEsercizio == nearestEsercizio){
+										var minutes = Math.ceil(infoDistance.time / 60);
+										//var seconds = infoDistance.time - minutes * 60;
+										$(".distanzaEsercizio").html("<img src='img/distanza.png'>"+infoDistance.distance+" m - "+minutes+" min<p class='esercizioVicino'>"+window.localStorage.getItem("vicinoA")+" "+infoDistance.nomeEsercizio+"</p>");
+									}
+								});
+						}
+						else{
+						$(".distanzaEsercizio").html("<img src='img/distanza.png'>+200m");
+						}
+				}
+				else
+				{
+				$(".distanzaEsercizio").html("<img src='img/distanza.png'>"+window.localStorage.getItem("troppoLontano")+"");
+				}
+			
+			}); //END GET JSON POSITION 
+			
+			var userAccuracy = position.coords.accuracy;
+
+			if (!markerUtente) {
+			markerUtente = L.userMarker([userLatitude, userLongitude],{pulsing:true}).addTo(map);
+			markerUtente.setAccuracy(userAccuracy);
+			//map.setView(new L.LatLng(esercizioLatitude, esercizioLongitude),16);
+			}
+			markerUtente.setLatLng([userLatitude, userLongitude],{pulsing:true}).update();
+	
+		} // END ON SUCCESS
+	
+		function onErrorPosition(error) {
+			
+			if(error.code==1){
+				 // user said no!
+			}
+			if(error.code==2){
+				 // position unavailable
+			}
+			if(error.code==3){
+				  // timeout
+				if (device.platform === "iOS" || device.platform === "Android") {
+					watchID = navigator.geolocation.watchPosition(onSuccess, onErrorPosition,{maximumAge: 1500, timeout: 20000, enableHighAccuracy : false});
+				}
+				
+				if (device.platform === "WinCE" || device.platform === "Win32NT") {
+					console.log("no position");
+				}
+			}
+			
+		}
+
+// CLICK ZOOM BUTTONS
+	
+		$(document).on("click", 'button.groupMarker', function(){
+			map.setView(new L.LatLng(esercizioLatitude, esercizioLongitude),16);
+		});
+		
+		$(document).on("click", 'button.userMarker', function(){
+			map.setView(new L.LatLng(userLatitude, userLongitude),16);
+		});
+	
+	});
+	// END OF PAGESHOW
+
+// CLICK DIRECTIONS
+	$(document).on("click", 'a.directions', function(){
+		geoPosition = $(this).attr('geoPosition');
+		if (device.platform === "Android") {
+			directions(geoPosition);
+		}
+		if (device.platform === "iOS") {
+			window.location.href = "maps:q="+geoPosition+"";
+		}
+		
+		if (device.platform === "WinCE" || device.platform === "Win32NT") {
+			window.location.href = "maps:"+geoPosition+"";
+		}
+	});
+	
+// CLICK TRANSLATE GOOGLE
+	$(document).on("click", '.translate', function(){
+		var descrizioneTranslate = sessionStorage.getItem('descrizioneEsercizio');
+		var linguaDescrizione = $(this).attr('linguaDescrizione');
+		var codLingua = $(this).attr('codLingua');
+		var urlTranslate = encodeURI("http://translate.google.com/#"+linguaDescrizione+"/"+codLingua+"/"+descrizioneTranslate+"");
+		var ref = window.open(urlTranslate, '_blank', 'location=yes');
+		//ref.addEventListener('loadstart', function() { alert(event.url); });
+	});
+	
+// FUNZIONE DISTANZA NEAREST NODE
+	
+	function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+  
+		var R = 6371; // Radius of the earth in km
+  
+		var dLat = deg2rad(lat2-lat1);  // deg2rad below
+		var dLon = deg2rad(lon2-lon1); 
+  
+		var a = 
+		Math.sin(dLat/2) * Math.sin(dLat/2) +
+		Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+		Math.sin(dLon/2) * Math.sin(dLon/2)
+		; 
+  
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		var d = R * c * 1000; // Distance in km
+		return Math.round(d);
+	}
+
+	function deg2rad(deg) {
+		return deg * (Math.PI/180)
+	}
+		
+// FUNZIONE DIRECTIONS GOOGLE
+	
+	function directions(geoPosition) {
+		navigator.google_navigate.navigate(geoPosition, function() {
+			console.log('Success');
+		}, function(errMsg) {
+			console.log("Failed: " + errMsg);
+		});
+	}
+	
+	// /FUNZIONE DIRECTIONS
+	
+	    $(document).on("click", '.morelink', function(){
+		var moretext = ""+window.localStorage.getItem("mostra")+"";
+		var lesstext = ""+window.localStorage.getItem("nascondi")+"";
+		if($(this).hasClass("less")) {
+            $(this).removeClass("less");
+            $(this).html(moretext);
+        } else {
+            $(this).addClass("less");
+            $(this).html(lesstext);
+        }
+        $(this).parent().prev().toggle();
+        $(this).prev().toggle();
+        return false;
+    });
+		
+	$(document).on("click", '.votaFacebook', function(){
+	
+	idEsercizio = $("h3.nomeEsercizio").attr('idEsercizio');
+	latitudeFacebook = window.sessionStorage.getItem("userLatitude");
+	longitudeFacebook = window.sessionStorage.getItem("userLongitude");
+	nomeEsercizio = $("h3.nomeEsercizio").html();
+	var userFacebook = localStorage.getItem("idFacebook");
+	var descrizioneFacebook;
+	if (sessionStorage.getItem('descrizioneEsercizio') != null){ descrizioneFacebook = sessionStorage.getItem('descrizioneEsercizio')};
+	FB.ui(
+	{
+		method: 'feed',
+		name: $("h3.nomeEsercizio").html(),
+		link: 'http://shopincomo.comune.como.it/it/node/'+idEsercizio,
+		picture: 'http://shopincomo.comune.como.it/imgs/logoShopincomo.jpg',
+		caption: 'Shopincomo',
+		description: descrizioneFacebook
+	},
+	function(response) {
+		if (response) {
+			$.ajax({
+				type: 'POST',
+				url: 'http://shopincomo.comune.como.it/ccn20/votiSocial.php',
+				data: { idNegozio: idEsercizio, socialNetwork: 'Facebook', nomeNegozio: $("h3.nomeEsercizio").html(), latitude: latitudeFacebook, longitude: longitudeFacebook, idUtente: userFacebook}
+				}).done(function( msg ) {
+				//alert(window.localStorage.getItem("postPubblicato"));
+			});	
+		} 
+		else {
+		alert('Post was not published.');
+		}
+	}
+	);
+	
+	});
+	
+	$(document).on("click", '.votaFoursquare', function(){
+		
+		var latitude = window.sessionStorage.getItem("userLatitude");
+		var longitude = window.sessionStorage.getItem("userLongitude");
+		var nomeEsercizioFoursquare = $("h3.nomeEsercizio").html();
+		var tokenFoursquare = window.localStorage.getItem("tokenFoursquare");		
+									
+		$.getJSON('https://api.foursquare.com/v2/venues/search?ll='+latitude+','+longitude+'&limit=4&query='+nomeEsercizioFoursquare+'&radius=100&oauth_token='+tokenFoursquare+'&v=20140410',
+			function(data) {
+			venues = data.response.venues;
+			$("ul#lista_checkin").html("");
+			$("ul#lista_checkin").append($("<li data-role='divider'>Check In</li>"));
+				if (venues.length == 0) {
+					$("ul#lista_checkin").append($("<li></li>",{"html":""+window.localStorage.getItem("noCheckin")+"" }));
+				}
+				else {
+					for (var i = 0; i < venues.length; i++) {
+					$("ul#lista_checkin").append($("<li></li>",{"html":"<a href='#' class='link_ckeckin' idVenue='"+venues[i].id+"'>"+venues[i].name+"</a>" }));
+					}
+				}
+				$("ul#lista_checkin").listview("destroy").listview();
+			});
+	});
+	
+	
+	$(document).on("click", '.link_ckeckin', function(){
+				
+		var tokenFoursquare = window.localStorage.getItem("tokenFoursquare");	
+		var idVenue = $(this).attr('idVenue');
+		
+		idEsercizio = $("h3.nomeEsercizio").attr('idEsercizio');
+		latitudeFoursquare = window.sessionStorage.getItem("userLatitude");
+		longitudeFoursquare = window.sessionStorage.getItem("userLongitude");
+		nomeEsercizio = $("h3.nomeEsercizio").html();
+		var userFoursquare = localStorage.getItem("idFoursquare");
+		
+		//var idUserFoursquare = window.localStorage.getItem("idUserFoursquare");
+					
+		var urlFoursquare = 'https://api.foursquare.com/v2/checkins/add?venueId=' + idVenue +'&v=20140410&oauth_token=' + tokenFoursquare;
+		$.post(urlFoursquare, function() {
+		    $.ajax({
+				type: 'POST',
+				url: 'http://shopincomo.comune.como.it/ccn20/votiSocial.php',
+				data: { idNegozio: idEsercizio, socialNetwork: 'Foursquare', nomeNegozio: $("h3.nomeEsercizio").html(), latitude: latitudeFoursquare, longitude: longitudeFoursquare, idUtente: userFoursquare}
+				}).done(function( msg ) {
+				alert(window.localStorage.getItem("checkinPubblicato"));
+			});	
+		$( "#popupCheckin" ).popup( "close" )
+		});
+			
+	});
+	
+	$(document).on("click", '.votaTwitter', function(){
+		
+		idEsercizio = $("h3.nomeEsercizio").attr('idEsercizio');
+		latitudeTwitter = window.sessionStorage.getItem("userLatitude");
+		longitudeTwitter = window.sessionStorage.getItem("userLongitude");
+		urlEsercizio = "http://shopincomo.comune.como.it/it/node/"+idEsercizio;
+		nomeEsercizio = $("h3.nomeEsercizio").html();
+		var userTwitter = localStorage.getItem("idTwitter");
+		
+		var tokenTwitter = window.localStorage.getItem("twitterToken");		
+		var tokenTwitterSecret = window.localStorage.getItem("twitterVerifier");			
+		var urlTwitter = 'http://shopincomo.comune.como.it/twitter/votaTwitter.php';
+		var tweet = "#ShopInComo @ "+nomeEsercizio.substr(0, 50)+" "+urlEsercizio;
+
+		 // fire off the request to /form.php
+		var request = $.ajax({
+			url: urlTwitter,
+			type: "post",
+			data: {access_token: tokenTwitter, access_token_secret: tokenTwitterSecret, tweet: tweet}
+    });
+
+    // callback handler that will be called on success
+    request.done(function (response){
+        	$.ajax({
+				type: 'POST',
+				url: 'http://shopincomo.comune.como.it/ccn20/votiSocial.php',
+				data: { idNegozio: idEsercizio, socialNetwork: 'Twitter', nomeNegozio: $("h3.nomeEsercizio").html(), latitude: latitudeTwitter, longitude: longitudeTwitter, idUtente: userTwitter}
+				}).done(function( msg ) {
+				alert(window.localStorage.getItem("tweetPubblicato"));
+					});		
+		// log a message to the console
+        
+    });
+
+    // callback handler that will be called on failure
+    request.fail(function (response){
+        // log the error to the console
+        alert("error");
+    });
+		
+	});
+		
+	</script>
+	
+	<ul data-role="listview" data-inset="true" style="background:fd613d" class="listaMappa">
+    <li style="background:#fd613d">
+	<h3 class="nomeEsercizio" style="color:white; text-shadow:none"></h3>
+	<p class="indirizzoEsercizio" style="color:white; text-shadow:none"></p>
+    <p class="brandEsercizio" style="color:white; text-shadow:none"></p>
+	</li>
+	<li>
+	<!-- DESCRIZIONE ESERCIZIO -->
+	<p class="descrizioneEsercizio showDescrizione"></p>
+	<p class="traduciDescrizioneEsercizio"></p>
+	<!-- /DESCRIZIONE ESERCIZIO -->
+	</li>
+	<li>
+	<div id="mappa"></div>
+	</li>
+	<li class="navigateEsercizio">
+	<a class="directions" href="#"><img src="img/navigation.png">
+	<h2 class="titoloNavigazione"></h2>
+	<p class="distanzaEsercizio"></p>
+	</a>
+	</li>
+	<!--
+	<li>
+	<img src="img/parcheggio.png">
+	<h2 class="nomeParcheggioVicino"></h2>
+	<p class="indirizzoParcheggioVicino"></p>
+	</li>
+	-->
+	</ul>
+	
+	<ul data-role="listview" data-inset="true" class="listaSocial">
+	</ul>
+	
+	<div data-role="popup" id="popupCheckin" data-theme="b">
+		<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+		<ul id="lista_checkin" data-role="listview" style="min-width:210px;">
+		</ul>
+	</div>
+		
+	</div><!-- /content -->
+
+	<!-- FOOTER -->
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false">
+		<!-- NAVBAR -->
+		<div data-role="navbar">
+            <ul>
+                <li><a href="#" class="ui-btn-active ui-state-persist"><img src="img/vetrina.png"></a></li>
+                <li><a href="#vetrinaOrari" data-transition="slide"><img src="img/orari.png"></a></li>
+                <li><a href="#vetrinaContatti" data-transition="slide"><img src="img/contatti.png"></a></li>
+				<li><a href="#vetrinaStatistiche" data-transition="slide"><img src="img/statistiche.png"></a></li>
+            </ul>
+        </div>
+		<!-- /NAVBAR -->
+	</div>
+	<!-- /FOOTER -->
+	
+</div><!-- /page vetrinaMappa -->
+
+<!-- Start of page: #vetrinaOrari -->
+<div data-role="page" id="vetrinaOrari">
+
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+		<h1></h1>
+		<a href="#eserciziViciniMappa" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" >
+		
+	
+	<script type="text/javascript" charset="utf-8">
+	
+	$( document ).on( "pagebeforeshow", "#vetrinaOrari", function() {
+	
+	document.addEventListener("backbutton", onBackKeyDown, false);
+		
+		function onBackKeyDown(e) {
+		e.preventDefault();
+		}
+	
+	var jsonVetrina = window.sessionStorage.getItem("jsonVetrina");
+	
+	// NOME ESERCIZIO + ORARI ESERCIZIO
+	
+	$("ul#orariEsercizio").html("");
+	
+	$.each(JSON.parse(jsonVetrina), function(index, info) {
+				
+		if (info.mostraOrari == "si"){
+		$("ul#orariEsercizio").append($("<li data-role='list-divider'>"+window.localStorage.getItem("orariApertura")+"</li>"));
+		$("ul#orariEsercizio").append($("<li>"+window.localStorage.getItem("lunedi")+": "+info.Orario.lunedi+"</li>"));
+		$("ul#orariEsercizio").append($("<li>"+window.localStorage.getItem("martedi")+": "+info.Orario.martedi+"</li>"));
+		$("ul#orariEsercizio").append($("<li>"+window.localStorage.getItem("mercoledi")+": "+info.Orario.mercoledi+"</li>"));
+		$("ul#orariEsercizio").append($("<li>"+window.localStorage.getItem("giovedi")+": "+info.Orario.giovedi+"</li>"));
+		$("ul#orariEsercizio").append($("<li>"+window.localStorage.getItem("venerdi")+": "+info.Orario.venerdi+"</li>"));
+		$("ul#orariEsercizio").append($("<li>"+window.localStorage.getItem("sabato")+": "+info.Orario.sabato+"</li>"));
+		$("ul#orariEsercizio").append($("<li>"+window.localStorage.getItem("domenica")+": "+info.Orario.domenica+"</li>"));
+		$("ul#orariEsercizio").listview("refresh");
+		}
+		else {
+		$("ul#orariEsercizio").append($("<li data-role='list-divider'>"+window.localStorage.getItem("noOrari")+"</li>"));
+		$("ul#orariEsercizio").listview("refresh");
+		}
+	});
+		
+		
+	// /NOME ESERCIZIO + ORARI ESERCIZIO
+	
+	});
+	// /PAGEBEFORESHOW
+	
+	
+	</script>
+	
+	<!-- ORARI -->
+	<ul id="orariEsercizio" data-role="listview" data-inset="true">
+	</ul>
+	<!-- /ORARI -->
+			
+	</div><!-- /content -->
+
+	<!-- FOOTER -->
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false">
+		<!-- NAVBAR -->
+		<div data-role="navbar">
+            <ul>
+                <li><a href="#vetrinaMappa" data-transition="slide" data-direction="reverse"><img src="img/vetrina.png"></a></li>
+                <li><a href="#" class="ui-btn-active ui-state-persist"><img src="img/orari.png"></a></li>
+                <li><a href="#vetrinaContatti" data-transition="slide"><img src="img/contatti.png"></a></li>
+				<li><a href="#vetrinaStatistiche" data-transition="slide"><img src="img/statistiche.png"></a></li>
+            </ul>
+        </div>
+		<!-- /NAVBAR -->
+	</div>
+	<!-- /FOOTER -->
+	
+</div><!-- /page vetrinaOrari -->
+
+<!-- Start of page: #vetrinaContatti -->
+<div data-role="page" id="vetrinaContatti">
+
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+		<h1></h1>
+		<a href="#eserciziViciniMappa" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" >
+		
+	
+	<script type="text/javascript" charset="utf-8">
+	
+	$( document ).on( "pagebeforeshow", "#vetrinaContatti", function() {
+	
+	document.addEventListener("backbutton", onBackKeyDown, false);
+		
+		function onBackKeyDown(e) {
+		e.preventDefault();
+		}
+	
+	var jsonVetrina = window.sessionStorage.getItem("jsonVetrina");
+	
+	// NOME ESERCIZIO + CONTATTI ESERCIZIO
+	
+	$("ul#contattiEsercizio").html("");
+	
+	$.each(JSON.parse(jsonVetrina), function(index, info) {
+				
+		$("ul#contattiEsercizio").append($("<li data-role='list-divider'>"+window.localStorage.getItem("contatti")+"</li>"));
+		$("ul#contattiEsercizio").append($("<li>"+info.Indirizzo+" "+info.Citta+"</li>"));
+		if (info.Telefono != undefined){$("ul#contattiEsercizio").append($("<li><a href=tel:"+info.Telefono.replace(/ /g,'')+"><img src='img/contattiTelefono.png'><h2>"+window.localStorage.getItem("telefono")+"</h2><p>"+info.Telefono+"</p></a></li>"))};
+		if (info.Website != undefined){$("ul#contattiEsercizio").append($("<li><a href='#' class='website' urlWebsite="+info.Website+"><img src='img/contattiWebsite.png'><h2>Website</h2><p>"+info.Website+"</p></a></li>"))};
+		if (info.Email != undefined){$("ul#contattiEsercizio").append($("<li><a href=mailto:"+info.Email+"><img src='img/contattiEmail.png'><h2>E-mail</h2><p>"+info.Email+"</p></a></li>"))};
+		if (info.Facebook != undefined){$("ul#contattiEsercizio").append($("<li><a href='#' class='website' urlWebsite="+info.Facebook.substring(info.Facebook.indexOf('w'))+"><img src='img/collegaFacebook.png'><h2>Facebook</h2></a></li>"))};
+		if (info.Twitter != undefined){$("ul#contattiEsercizio").append($("<li><a href='#' class='website' urlWebsite="+info.Twitter.substring(info.Twitter.indexOf('w'))+"><img src='img/collegaTwitter.png'><h2>Twitter</p></h2></li>"))};
+		if (info.Foursquare != undefined){$("ul#contattiEsercizio").append($("<li><a href='#' class='website' urlWebsite="+info.Foursquare.substring(info.Foursquare.indexOf('w'))+"><img src='img/collegaFoursquare.png'><h2>Foursquare</h2></a></li>"))};
+		if (info.Tripadvisor != undefined){$("ul#contattiEsercizio").append($("<li><a href='#' class='website' urlWebsite="+info.Tripadvisor.substring(info.Tripadvisor.indexOf('w'))+"><img src='img/collegaTripadvisor.png'><h2>Tripadvisor</h2></a></li>"))};
+		$("ul#contattiEsercizio").listview("refresh");
+							
+	});
+		
+		
+	// /NOME ESERCIZIO + CONTATTI ESERCIZIO
+	});
+	// /PAGEBEFORESHOW
+	
+	// CLICK WEBSITE
+	$(document).on("click", '.website', function(){
+		
+		var url = $(this).attr('urlWebsite');
+		var urlTranslate = encodeURI("http://"+url+"");
+		var ref = window.open(urlTranslate, '_blank', 'location=yes');
+	});
+	
+	
+	
+	</script>
+	
+	<!-- CONTATTI ESERCIZIO -->
+	<ul id="contattiEsercizio" data-role="listview" data-inset="true">
+	</ul>
+	
+	<!-- /CONTATTI ESERCIZIO -->
+			
+	</div><!-- /content -->
+
+	<!-- FOOTER -->
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false">
+		<!-- NAVBAR -->
+		<div data-role="navbar">
+            <ul>
+                <li><a href="#vetrinaMappa" data-transition="slide" data-direction="reverse"><img src="img/vetrina.png"></a></li>
+                <li><a href="#vetrinaOrari" data-transition="slide" data-direction="reverse"><img src="img/orari.png"></a></li>
+                <li><a href="#" class="ui-btn-active ui-state-persist"><img src="img/contatti.png"></a></li>
+				<li><a href="#vetrinaStatistiche" data-transition="slide"><img src="img/statistiche.png"></a></li>
+            </ul>
+        </div>
+		<!-- /NAVBAR -->
+	</div>
+	<!-- /FOOTER -->
+	
+</div><!-- /page vetrinaContatti -->
+
+<!-- Start of page: #vetrinaStatistiche -->
+<div data-role="page" id="vetrinaStatistiche">
+
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+		<h1></h1>
+		<a href="#eserciziViciniMappa" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" >
+		
+	
+	<script type="text/javascript" charset="utf-8">
+	
+	$( document ).on( "pagebeforeshow", "#vetrinaStatistiche", function() {
+	
+	document.addEventListener("backbutton", onBackKeyDown, false);
+		
+		function onBackKeyDown(e) {
+		e.preventDefault();
+		}
+		
+	$(".intervalli").html("");
+	$(".intervalli").append($('<button class="ui-btn" id="intervallo" value="7giorni">7 '+window.localStorage.getItem("giorni")+'</button>'));
+	$(".intervalli").append($('<button class="ui-btn" id="intervallo"value="15giorni">15 '+window.localStorage.getItem("giorni")+'</button>'));
+	$(".intervalli").append($('<button class="ui-btn" id="intervallo" value="30giorni">30 '+window.localStorage.getItem("giorni")+'</button>'));
+	
+	var jsonVetrina = window.sessionStorage.getItem("jsonVetrina");
+	
+	// NOME ESERCIZIO + STATISTICHE
+	
+	var checkStatistiche;
+	var idEsercizio;
+	
+		$.each(JSON.parse(jsonVetrina), function(index, info) {
+				
+			$("h3.nomeEsercizio").html(info.NomeEsercizio);
+			idEsercizio = info.idEsercizio;
+			checkStatistiche = info.Statistiche;
+			
+			
+		});
+	
+	if(checkStatistiche == "si"){
+	
+		var	connectionStatus = navigator.onLine ? 'online' : 'offline';
+		if (connectionStatus == "online")
+		{
+			
+			$.mobile.loading( "show", {
+            text: "loading",
+            textVisible: true,
+            theme: "a",
+            textonly: false
+			});
+			
+			$(function () {
+			var chart;
+			var perShapeGradient = {
+				x1: 0,
+				y1: 0,
+				x2: 1,
+				y2: 0
+			};
+
+			$(document).ready(function() {
+		
+			$.getJSON("http://shopincomo.comune.como.it/ccn20/JSONbarchart.php", {idNegozio: idEsercizio}, function( json ) {
+				
+				$.mobile.loading( "hide" );
+				
+				jsonFilter = jQuery.grep(json, function (v) {
+				return v.intervallo == "15giorni";
+				console.log("filtro base: ");
+				console.log(jsonFilter);
+				});
+		
+				chart = new Highcharts.Chart({
+					chart: {
+						renderTo: 'barChart',
+						type: 'column',
+						marginRight: 10,
+						marginBottom: 25
+					},
+					colors: [{
+						linearGradient: perShapeGradient,
+						stops: [
+							[0, 'rgb(80, 135, 226)'],
+							[1, 'rgb(25, 70, 148)']
+							]
+						}, {
+						linearGradient: perShapeGradient,
+						stops: [
+							[0, 'rgb(120, 202, 248)'],
+							[1, 'rgb(46, 150, 208)']
+							]
+						}, {
+						linearGradient: perShapeGradient,
+						stops: [
+							[0, 'rgb(136, 219, 5)'],
+							[1, 'rgb(112, 180, 5)']
+							]}, 
+					],
+					title: {
+						text: '',
+						x: -20, //center
+					},
+					subtitle: {
+						text: '',
+						x: -20
+					},
+					xAxis: {
+						startOnTick: false,
+						endOnTick:false,
+						type: 'datetime',
+						tickInterval: 4 * 24 * 3600 * 1000,
+						minTickInterval: 86400000,
+						dateTimeLabelFormats: {
+						day: '%e %m'
+						},
+						labels: {
+						enabled: false
+						}
+					},
+					yAxis: {
+						allowDecimals: false,
+						stackLabels: {
+						enabled: true
+						},
+						title: {
+						text: ''+window.localStorage.getItem("voti")+''
+						}
+					},
+					tooltip: {
+						enabled: true,
+						xDateFormat: '%d-%m-%Y'
+					},
+					plotOptions: {
+						column: {
+						stacking: 'normal',
+						pointWidth:5,
+						dataLabels: {
+										enabled: false,
+										color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'black'
+									}
+						}
+					},
+					legend: {
+						layout: 'horizontal',
+						align: 'center',
+						verticalAlign: 'top',
+						borderWidth: 0,
+						enabled: true,
+						floating: true
+					},
+					series: jsonFilter
+				});
+
+				
+			$( "button#intervallo" ).click(function() {
+			var intervallo = $(this).attr('value');
+			jsonFilter = jQuery.grep(json, function (v) {
+			return v.intervallo == intervallo;
+			});
+		
+			chart = new Highcharts.Chart({
+					chart: {
+						renderTo: 'barChart',
+						type: 'column',
+						marginRight: 10,
+						marginBottom: 25
+					},
+					colors: [{
+						linearGradient: perShapeGradient,
+						stops: [
+							[0, 'rgb(80, 135, 226)'],
+							[1, 'rgb(25, 70, 148)']
+							]
+						}, {
+						linearGradient: perShapeGradient,
+						stops: [
+							[0, 'rgb(120, 202, 248)'],
+							[1, 'rgb(46, 150, 208)']
+							]
+						}, {
+						linearGradient: perShapeGradient,
+						stops: [
+							[0, 'rgb(136, 219, 5)'],
+							[1, 'rgb(112, 180, 5)']
+							]}, 
+					],
+					title: {
+						text: '',
+						x: -20, //center
+					},
+					subtitle: {
+						text: '',
+						x: -20
+					},
+					xAxis: {
+						startOnTick: false,
+						endOnTick:false,
+						type: 'datetime',
+						tickInterval: 4 * 24 * 3600 * 1000,
+						minTickInterval: 86400000,
+						dateTimeLabelFormats: {
+						day: '%e %m'
+						},
+						labels: {
+						enabled: false
+						}
+					},
+					yAxis: {
+						allowDecimals: false,
+						stackLabels: {
+						enabled: true
+						},
+						title: {
+						text: ''+window.localStorage.getItem("voti")+''
+						}
+					},
+					tooltip: {
+						enabled: true,
+						xDateFormat: '%d-%m-%Y'
+					},
+					plotOptions: {
+						column: {
+						stacking: 'normal',
+						pointWidth:5,
+						dataLabels: {
+										enabled: false,
+										color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'black'
+									}
+						}
+					},
+					legend: {
+						layout: 'horizontal',
+						align: 'center',
+						verticalAlign: 'top',
+						borderWidth: 0,
+						enabled: true,
+						floating: true
+					},
+					series: jsonFilter
+				});
+
+		
+		
+			});
+		
+			});
+			});
+		
+			});
+		
+		}
+		else{
+		$("#box-statisticheEsercizio").hide();
+		$("ul#statisticheEsercizio").append($("<li data-role='list-divider'>"+window.localStorage.getItem("essereOnline")+"</li>"));
+		$("ul#statisticheEsercizio").listview("refresh");
+		}
+	
+	}
+	else{
+	$("#box-statisticheEsercizio").hide();
+	$("ul#statisticheEsercizio").append($("<li data-role='list-divider'>"+window.localStorage.getItem("noStatistiche")+"</li>"));
+	$("ul#statisticheEsercizio").listview("refresh");
+	}
+		
+	// /NOME ESERCIZIO + STATISTICHE
+	
+	});
+	// /PAGEBEFORESHOW
+
+	</script>
+	
+	<!-- STATISTICHE -->
+	<ul id="statisticheEsercizio" data-role="listview" data-inset="true">
+	</ul>
+	<div id="box-statisticheEsercizio">
+	<div id="barChart" style="width: 1920px; height:450px"></div>
+	<div class="intervalli">
+	</div>
+	</div>
+	<!-- /STATISTICHE -->
+	
+		
+	</div><!-- /content -->
+
+	<!-- FOOTER -->
+	<div data-role="footer" data-position="fixed" data-tap-toggle="false">
+		<!-- NAVBAR -->
+		<div data-role="navbar">
+            <ul>
+                <li><a href="#vetrinaMappa" data-transition="slide" data-direction="reverse"><img src="img/vetrina.png"></a></li>
+                <li><a href="#vetrinaOrari" data-transition="slide" data-direction="reverse"><img src="img/orari.png"></a></li>
+                <li><a href="#vetrinaContatti" data-transition="slide" data-direction="reverse"><img src="img/contatti.png"></a></li>
+				<li><a href="#" class="ui-btn-active ui-state-persist"><img src="img/statistiche.png"></a></li>
+            </ul>
+        </div>
+		<!-- /NAVBAR -->
+	</div>
+	<!-- /FOOTER -->
+	
+</div><!-- /page vetrinaStatistiche -->
+
+</body>
+</html>
