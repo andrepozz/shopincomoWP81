@@ -877,131 +877,25 @@
 	$("ul.downloadList").append($('<li class="categorie"><img class="iconaTipologia" src="img/downloadCategorie.png"> DOWNLOAD '+window.localStorage.getItem("categorie")+'...<img src="img/download.gif"></li>'));
 	$("ul.downloadList").append($('<li class="sottocategorie"><img class="iconaTipologia" src="img/downloadSottocategorie.png"> DOWNLOAD '+window.localStorage.getItem("sottoCategorie")+'...<img src="img/download.gif"></li>'));
 	
-	var urlCategorie = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONcategorie.php?language="+codLingua+"");	
+	
+
+	//DOWNLOAD FILE CATEGORIE
+	
+	var urlCategorie = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONcategorie.php?language="+codLingua+"");
+	
+	$.ajax({
+		url: urlCategorie,
+		dataType: 'json',
+		async: false
+	}).done(function(data) {
+		alert("success");
+		window.localStorage.setItem('jsonCategorie', data);
+	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+		alert("Status: " + textStatus);
+		alert("Error: " + errorThrown); 
+	}); // ajax
 		
-		var fileTransfer = new FileTransfer();
-			
-		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-			
-			fileSystem.root.getDirectory("ShopInComo", {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
 
-				function onGetDirectorySuccess(dirEntry){
-
-
-					//MEMORIZZA PATH
-					var directory = dirEntry.fullPath;
-					
-								
-						if (device.platform === "Android") {
-							var indexPath = directory.lastIndexOf("/");
-							var pathSD = directory.substr(7, indexPath-7);
-							pathSD = pathSD+"/ShopInComo";
-							window.localStorage.setItem('pathSD', pathSD);
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-						
-						if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataDirectorySuccess(dirEntry);
-							var pathSD = directory;
-							window.localStorage.setItem('pathSD', pathSD);
-						}
-								
-						if (device.platform === "iOS") {
-							dirEntry.setMetadata(onSetMetadataDirectorySuccess(dirEntry), onSetMetadataDirectoryFail, { "com.apple.MobileBackup": 1});
-							var pathSD = directory;
-							window.localStorage.setItem('pathSD', pathSD);
-						}
-								
-				} // close onGetDirectorySuccess
-
-				function onGetDirectoryFail(){
-
-				console.log("Fail to get directory");
-
-				} // close onGetDirectoryFail
-
-				function onSetMetadataDirectorySuccess(dirEntry){
-				
-
-				var fileNameCategorie = "categorie.js";
-				dirEntry.getFile(fileNameCategorie, {create: true, exclusive: false}, onGetFileSuccess, onGetFileFail);
-
-				} // close onSetMetadataDirectorySuccess
-
-				function onSetMetadataDirectoryFail(){
-
-				console.log("Fail to set metadata directory");
-
-				} // close onSetMetadataDirectoryFail
-
-
-				function onGetFileSuccess(fileEntry){
-
-
-					if (device.platform === "iOS") {
-						fileEntry.setMetadata(onSetMetadataFileSuccess(fileEntry), onSetMetadataFileFail, { "com.apple.MobileBackup": 1});
-					}
-
-					if (device.platform === "Android") {
-						onSetMetadataFileSuccess(fileEntry);
-					}
-					
-					if (device.platform === "WinCE" || device.platform === "Win32NT") {
-						onSetMetadataFileSuccess(fileEntry);
-					}
-
-				} // close onGetFileSuccess
-
-				function onGetFileFail(){
-
-					console.log("Fail to get file");
-
-				} // close onGetFileFail
-
-				function onSetMetadataFileSuccess(fileEntry){
-
-
-					var localPath = fileEntry.fullPath;
-
-						if (device.platform === "Android" && localPath.indexOf("file://") === 0) {
-							localPath = localPath.substring(7);
-						}
-					
-					fileTransfer.download(
-						urlCategorie,
-						localPath,
-						
-						function(entry) {
-						
-								$("li.categorie").html("<img class='iconaTipologia' src='img/downloadCategorie.png'> DOWNLOAD "+window.localStorage.getItem("categorie")+"");
-								$("li.categorie").css("color","white");
-								$("li.categorie").css("background","#00CC00");
-								
-								getSottocategorie();
-						},
-						function(error) {
-							console.log("download error source " + error.source);
-							console.log("download error target " + error.target);
-							console.log("download error code " + error.code);
-						},
-						false,
-						{
-							headers: {
-								"Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
-							}
-						}
-				
-					); // end of fileTransfer.download
-
-				} // close onSetMetadataFileSuccess
-
-				function onSetMetadataFileFail(){
-
-					console.log("Fail to set metadata file");
-
-				} // close onSetMetadataFileFail
-			
-		}); // end of window.requestFileSystem
 		
 	//FUNCTION getSottocategorie()
 	function getSottocategorie() {
