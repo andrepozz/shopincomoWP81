@@ -941,7 +941,12 @@
 			window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 			
 			if(dataName == "jsonCategorie"){
-				downloadSottocategorie(dataClass, dataImg);
+				
+				//DOWNLOAD FILE SOTTOCATEGORIE
+				var dataClassSottocategorie = ""+window.localStorage.getItem("sottoCategorie")+"";
+				var dataImgSottocategorie = "downloadSottocategorie";
+				downloadSottocategorie(dataClassSottocategorie, dataImgSottocategorie);
+				
 			}
 			
 			$("li."+dataClass+"").html("<img class='iconaTipologia' src='img/"+dataImg+".png'> DOWNLOAD "+dataClass+"");
