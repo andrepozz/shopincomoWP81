@@ -1068,7 +1068,7 @@
 	
 	var jsonIdEsercizi = JSON.parse(window.localStorage.getItem("jsonNomeEsercizi"));
 	var numeroEsercizi = jsonIdEsercizi.length;
-	
+	var codLingua = window.localStorage.getItem('codLingua');
 	var widthBlocchiDownload = 100/numeroEsercizi;
 	
 	$.each(jsonIdEsercizi, function(index,info) {
