@@ -78,7 +78,7 @@
 				
 				var data = window.localStorage.getItem('jsonNomeEsercizi');
 		
-				json_filter = $.grep(data, function(item){
+				json_filter = $.grep(JSON.parse(data), function(item){
 				return matcher.test(item.nomeEsercizio); 
 				})
 

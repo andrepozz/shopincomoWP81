@@ -889,7 +889,7 @@
 		async: false
 	}).done(function(data) {
 		alert("success");
-		window.localStorage.setItem('jsonCategorie', data);
+		window.localStorage.setItem('jsonCategorie', JSON.stringify(data));
 	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
 		alert("Status: " + textStatus);
 		alert("Error: " + errorThrown); 
@@ -903,7 +903,7 @@
 		async: false
 	}).done(function(data) {
 		alert("success");
-		window.localStorage.setItem('jsonNomeEsercizi', data);
+		window.localStorage.setItem('jsonNomeEsercizi', JSON.stringify(data));
 	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
 		alert("Status: " + textStatus);
 		alert("Error: " + errorThrown); 
