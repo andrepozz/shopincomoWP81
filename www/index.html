@@ -1068,7 +1068,6 @@
 	
 	var jsonIdEsercizi = JSON.parse(window.localStorage.getItem("jsonNomeEsercizi"));
 	var numeroEsercizi = jsonIdEsercizi.length;
-	alert(numeroEsercizi);
 	var codLingua = window.localStorage.getItem('codLingua');
 	var widthBlocchiDownload = 100/numeroEsercizi;
 	
@@ -1082,7 +1081,6 @@
 	
 	$.getJSON(urlVetrinaEsercizio)
 	.done(function(data) {
-		alert("ok");
 		window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 		$("div.progressBar").append("<div class='"+i+"' style='width:"+widthBlocchiDownload.toFixed(2)+"%; height:40px; float:left; background: #00CC00'></div>");			
 	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
