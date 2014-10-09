@@ -882,35 +882,98 @@
 	//DOWNLOAD FILE CATEGORIE
 	
 	var urlCategorie = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONcategorie.php?language="+codLingua+"");
+	var dataName = "jsonCategorie";
+	var dataClass = ""+window.localStorage.getItem("categorie")+"";
+	var dataImg = "downloadCategorie.png";
 	
-	$.ajax({
-		url: urlCategorie,
-		dataType: 'json',
-		async: false
-	}).done(function(data) {
-		alert("success");
-		window.localStorage.setItem('jsonCategorie', JSON.stringify(data));
-	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
-		alert("Status: " + textStatus);
-		alert("Error: " + errorThrown); 
-	}); // ajax
+	downloadData(urlCategorie, dataName, dataClass, dataImg);
+	
+	//DOWNLOAD FILE SOTTOCATEGORIE
+	
+	var dataClass = ""+window.localStorage.getItem("sottoCategorie")+"";
+	var dataImg = "downloadSottocategorie.png";
+	
+	downloadSottocategorie(dataClass, dataImg);
+	
+	//DOWNLOAD FILE ESERCIZI
+	
+	//DOWNLOAD FILE POSIZIONE
+	
+	//DOWNLOAD FILE BRAND
+	
+	//DOWNLOAD FILE BRAND ESERCIZI
+	
+	
+	
+	function downloadData(dataUrl, dataName, dataClass, dataImg){
+	
+		$.ajax({
+			url: dataUrl,
+			dataType: 'json',
+			async: false
+		}).done(function(data) {
+		
+			window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
+			
+			$("li."+dataClass+"").html("<img class='iconaTipologia' src='img/download"+dataImg+".png'> DOWNLOAD "+dataClass+"");
+			$("li."+dataClass+"").css("color","white");
+			$("li."+dataClass+"").css("background","#00CC00");
+			
+		}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+			alert("Status: " + textStatus);
+			alert("Error: " + errorThrown); 
+		}); // ajax
+	
+	}
+	
+	function downloadSottocategorie(dataClass, dataImg){
+	
+		var codLingua = window.localStorage.getItem('codLingua');
+		var categorie = window.localStorage.getItem('jsonNomeEsercizi');
+		var numeroCategorie = JSON.parse(categorie).length;
+		
+		alert(numeroCategorie);
+		
+		$.each( JSON.parse(categorie), function(index,info) {
+		
+			numeroCategorie = parseInt(numeroCategorie)-1;
+			
+			if(numeroCategorie == 0){
+			
+				$("li."+dataClass+"").html("<img class='iconaTipologia' src='img/download"+dataImg+".png'> DOWNLOAD "+dataClass+"");
+				$("li."+dataClass+"").css("color","white");
+				$("li."+dataClass+"").css("background","#00CC00");
+			
+			}
+			else {
+				var urlSottocategorie = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONsottocategorieNegozi.php?idCategoria="+info.idCategoria+"&language="+codLingua+"");
+				var dataName = "json"+info.jsonName+"";
+				alert(dataName);
+				
+				$.ajax({
+					url: urlSottocategorie,
+					dataType: 'json',
+					async: false
+				}).done(function(data) {
+				
+					window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
+						
+				}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+					alert("Status: " + textStatus);
+					alert("Error: " + errorThrown); 
+				}); // ajax
+			}
+		
+		});
+		
+	}
 	
 	var urlnomeEsercizi = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONnomeEsercizi.php");
 	
-	$.ajax({
-		url: urlnomeEsercizi,
-		dataType: 'json',
-		async: false
-	}).done(function(data) {
-		alert("success");
-		window.localStorage.setItem('jsonNomeEsercizi', JSON.stringify(data));
-	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
-		alert("Status: " + textStatus);
-		alert("Error: " + errorThrown); 
-	}); // ajax
-		
+	}); // ON "pageshow"	
 
-		
+	/*
+	
 	//FUNCTION getSottocategorie()
 	function getSottocategorie() {
 	
@@ -978,7 +1041,7 @@
 	//downloadJSON(directory, filePosition, urlposition, pClass, imgName);
 	
 	
-	}); // ON "pageshow"
+
 	
 	//DOWNLOAD JSON FUNCTION
 	function downloadJSON(directory, fileName, fileURL, pClass, imgName) {
@@ -1221,7 +1284,7 @@
 		}); // end of window.requestFileSystem
 		
 	} //FUNCTION DOWNLOAD SOTTOCATEGORIE
-	
+	*/
 	</script>
 	
 	<h3 class="titoloDownloadFunzionalita"></h3>
