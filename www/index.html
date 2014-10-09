@@ -940,9 +940,14 @@
 		
 			window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 			
+			if(dataName == "jsonCategorie"){
+				downloadSottocategorie(dataClass, dataImg);
+			}
+			
 			$("li."+dataClass+"").html("<img class='iconaTipologia' src='img/"+dataImg+".png'> DOWNLOAD "+dataClass+"");
 			$("li."+dataClass+"").css("color","white");
 			$("li."+dataClass+"").css("background","#00CC00");
+			
 			
 		}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
 			downloadData(dataUrl, dataName, dataClass, dataImg) 
