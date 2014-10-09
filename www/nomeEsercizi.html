@@ -164,8 +164,8 @@
 	$.ajax({
 		url: jsonPath,
 		dataType: 'json',
-		async: false,
-	)}.done(function(data) {
+		async: false
+	}).done(function(data) {
 		jsonVetrina = data;
 		sessionStorage.setItem('jsonVetrina', JSON.stringify(jsonVetrina));
 	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
