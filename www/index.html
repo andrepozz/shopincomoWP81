@@ -956,6 +956,10 @@
 			
 			downloadCompletati = parseInt(downloadCompletati)+1;
 			
+			if(downloadCompletati == 6){
+				$("p.downloadComplete").html("<a href='#setupNegozi' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
+			}
+			
 			
 		}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
 			downloadData(dataUrl, dataName, dataClass, dataImg) 
@@ -979,6 +983,10 @@
 				$("li."+dataClass+"").css("background","#00CC00");
 				
 				downloadCompletati = parseInt(downloadCompletati)+1;
+				
+				if(downloadCompletati == 6){
+					$("p.downloadComplete").html("<a href='#setupNegozi' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
+				}
 			
 			}
 			else {
@@ -1012,9 +1020,7 @@
 	
 	alert(downloadCompletati);
 	
-	if(downloadCompletati == 6){
-		$("p.downloadComplete").html("<a href='#setupNegozi' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
-	}
+
 	
 	}); // ON "pageshow"	
 
