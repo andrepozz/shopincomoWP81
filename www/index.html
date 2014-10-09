@@ -878,6 +878,7 @@
 	$("ul.downloadList").append($('<li class="sottocategorie"><img class="iconaTipologia" src="img/downloadSottocategorie.png"> DOWNLOAD '+window.localStorage.getItem("sottoCategorie")+'...<img src="img/download.gif"></li>'));
 	
 	var codLingua = window.localStorage.getItem('codLingua');
+	var downloadCompletati;
 
 	//DOWNLOAD FILE CATEGORIE
 	
@@ -953,6 +954,8 @@
 			$("li."+dataClass+"").css("color","white");
 			$("li."+dataClass+"").css("background","#00CC00");
 			
+			downloadCompletati = parseInt(downloadCompletati)+1;
+			
 			
 		}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
 			downloadData(dataUrl, dataName, dataClass, dataImg) 
@@ -974,6 +977,8 @@
 				$("li."+dataClass+"").html("<img class='iconaTipologia' src='img/"+dataImg+".png'> DOWNLOAD "+dataClass+"");
 				$("li."+dataClass+"").css("color","white");
 				$("li."+dataClass+"").css("background","#00CC00");
+				
+				downloadCompletati = parseInt(downloadCompletati)+1;
 			
 			}
 			else {
@@ -1003,6 +1008,10 @@
 			downloadSottocategoria(urlSottocategorie, dataName); 
 		}); // ajax
 	
+	}
+	
+	if(downloadCompletati == 6){
+		$("p.downloadComplete").html("<a href='#setupNegozi' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
 	}
 	
 	}); // ON "pageshow"	
