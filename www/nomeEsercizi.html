@@ -81,7 +81,9 @@
 				json_filter = $.grep(JSON.parse(data), function(item){
 				return matcher.test(item.nomeEsercizio); 
 				})
-
+				
+				alert(json_filter.length);
+				
 				if(json_filter.length == 0){
 				html += "<li>"+window.localStorage.getItem("noRisultatiNome")+"</li>";
 				}
