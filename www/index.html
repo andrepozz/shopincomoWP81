@@ -935,11 +935,8 @@
 	
 	function downloadData(dataUrl, dataName, dataClass, dataImg){
 	
-		$.ajax({
-			url: dataUrl,
-			dataType: 'json',
-			async: false
-		}).done(function(data) {
+		$.getJSON(dataUrl)
+		.done(function(data) {
 		
 			window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 			
@@ -987,11 +984,8 @@
 	
 
 				
-		$.ajax({
-			url: urlSottocategorie,
-			dataType: 'json',
-			async: false
-		}).done(function(data) {
+		$.getJSON(urlSottocategorie)
+		.done(function(data) {
 			
 			window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 						
