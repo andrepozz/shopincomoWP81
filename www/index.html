@@ -1081,7 +1081,7 @@
 	
 	$.getJSON(urlVetrinaEsercizio)
 	.done(function(data) {
-			
+		alert("ok");
 		window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 		$("div.progressBar").append("<div class='"+i+"' style='width:"+widthBlocchiDownload.toFixed(2)+"%; height:40px; float:left; background: #00CC00'></div>");			
 	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
