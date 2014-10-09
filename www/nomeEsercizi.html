@@ -157,6 +157,7 @@
 	// CARICA FILE VETRINA
 	var path = window.localStorage.getItem("pathSD");
 	var jsonPath = path + "/esercizi/"+idEsercizio+".js";
+	alert(jsonPath);
 	//var jsonPath = "js/16.js";
 	var jsonVetrina;
 		
@@ -164,10 +165,12 @@
 		url: jsonPath,
 		dataType: 'json',
 		async: false,
-		success: function(data) {
+	)}.done(function(data) {
 		jsonVetrina = data;
 		sessionStorage.setItem('jsonVetrina', JSON.stringify(jsonVetrina));
-		}
+	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+		alert("Status: " + textStatus);
+		alert("Error: " + errorThrown); 
 	}); // ajax
 	
 	// NOME ESERCIZIO + INDIRIZZO + DESCRIZIONE
