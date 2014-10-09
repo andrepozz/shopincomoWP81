@@ -915,7 +915,7 @@
 		
 			window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 			
-			$("li."+dataClass+"").html("<img class='iconaTipologia' src='img/download"+dataImg+".png'> DOWNLOAD "+dataClass+"");
+			$("li."+dataClass+"").html("<img class='iconaTipologia' src='img/"+dataImg+".png'> DOWNLOAD "+dataClass+"");
 			$("li."+dataClass+"").css("color","white");
 			$("li."+dataClass+"").css("background","#00CC00");
 			
@@ -929,12 +929,12 @@
 	function downloadSottocategorie(dataClass, dataImg){
 	
 		var codLingua = window.localStorage.getItem('codLingua');
-		var categorie = window.localStorage.getItem('jsonNomeEsercizi');
-		var numeroCategorie = JSON.parse(categorie).length;
+		var categorie = JSON.parse(window.localStorage.getItem('jsonCategorie'));
+		var numeroCategorie = categorie.length;
 		
 		alert(numeroCategorie);
 		
-		$.each( JSON.parse(categorie), function(index,info) {
+		$.each(categorie, function(index,info) {
 		
 			numeroCategorie = parseInt(numeroCategorie)-1;
 			
