@@ -1073,7 +1073,7 @@
 	var widthBlocchiDownload = 100/numeroEsercizi;
 	
 	$.each(jsonIdEsercizi, function(index,info) {
-	var urlEsercizi = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+info.idEsercizio+"");
+	var urlVetrinaEsercizio = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+info.idEsercizio+"");
 	var dataName = "json"+info.idEsercizio+"";
 	downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName);
 	});
