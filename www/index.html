@@ -877,25 +877,32 @@
 	$("ul.downloadList").append($('<li class="categorie"><img class="iconaTipologia" src="img/downloadCategorie.png"> DOWNLOAD '+window.localStorage.getItem("categorie")+'...<img src="img/download.gif"></li>'));
 	$("ul.downloadList").append($('<li class="sottocategorie"><img class="iconaTipologia" src="img/downloadSottocategorie.png"> DOWNLOAD '+window.localStorage.getItem("sottoCategorie")+'...<img src="img/download.gif"></li>'));
 	
-	
+	var codLingua = window.localStorage.getItem('codLingua');
 
 	//DOWNLOAD FILE CATEGORIE
 	
 	var urlCategorie = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONcategorie.php?language="+codLingua+"");
 	var dataName = "jsonCategorie";
 	var dataClass = ""+window.localStorage.getItem("categorie")+"";
-	var dataImg = "downloadCategorie.png";
+	var dataImg = "downloadCategorie";
 	
 	downloadData(urlCategorie, dataName, dataClass, dataImg);
 	
 	//DOWNLOAD FILE SOTTOCATEGORIE
 	
 	var dataClass = ""+window.localStorage.getItem("sottoCategorie")+"";
-	var dataImg = "downloadSottocategorie.png";
+	var dataImg = "downloadSottocategorie";
 	
 	downloadSottocategorie(dataClass, dataImg);
 	
 	//DOWNLOAD FILE ESERCIZI
+	
+	var urlCategorie = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONcategorie.php?language="+codLingua+"");
+	var dataName = "jsonCategorie";
+	var dataClass = ""+window.localStorage.getItem("categorie")+"";
+	var dataImg = "downloadCategorie";
+	
+	downloadData(urlCategorie, dataName, dataClass, dataImg);
 	
 	//DOWNLOAD FILE POSIZIONE
 	
@@ -928,7 +935,6 @@
 	
 	function downloadSottocategorie(dataClass, dataImg){
 	
-		var codLingua = window.localStorage.getItem('codLingua');
 		var categorie = JSON.parse(window.localStorage.getItem('jsonCategorie'));
 		var numeroCategorie = categorie.length;
 		
@@ -940,7 +946,7 @@
 			
 			if(numeroCategorie == 0){
 			
-				$("li."+dataClass+"").html("<img class='iconaTipologia' src='img/download"+dataImg+".png'> DOWNLOAD "+dataClass+"");
+				$("li."+dataClass+"").html("<img class='iconaTipologia' src='img/"+dataImg+".png'> DOWNLOAD "+dataClass+"");
 				$("li."+dataClass+"").css("color","white");
 				$("li."+dataClass+"").css("background","#00CC00");
 			
