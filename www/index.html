@@ -895,21 +895,42 @@
 	
 	downloadSottocategorie(dataClass, dataImg);
 	
-	//DOWNLOAD FILE ESERCIZI
+	//DOWNLOAD FILE NOME ESERCIZI
 	
-	var urlCategorie = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONcategorie.php?language="+codLingua+"");
-	var dataName = "jsonCategorie";
-	var dataClass = ""+window.localStorage.getItem("categorie")+"";
-	var dataImg = "downloadCategorie";
+	var urlnomeEsercizi = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONnomeEsercizi.php");	
+	var dataName = "jsonNomeEsercizi";
+	var dataClass = ""+window.localStorage.getItem("nomiEsercizi")+"";
+	var dataImg = "downloadnome";
 	
-	downloadData(urlCategorie, dataName, dataClass, dataImg);
+	downloadData(urlnomeEsercizi, dataName, dataClass, dataImg);
 	
 	//DOWNLOAD FILE POSIZIONE
 	
+	var urlposition = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONposition.php");	
+	var dataName = "jsonPosizioneEsercizi";
+	var dataClass = ""+window.localStorage.getItem("position")+"";
+	var dataImg = "downloadposition";
+	
+	downloadData(urlnomeEsercizi, dataName, dataClass, dataImg);
+	
 	//DOWNLOAD FILE BRAND
 	
+	var urlbrand = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONbrand.php");	
+	var dataName = "jsonBrand";
+	var dataClass = "brand";
+	var dataImg = "downloadbrand";
+	
+	downloadData(urlbrand, dataName, dataClass, dataImg);
+		
 	//DOWNLOAD FILE BRAND ESERCIZI
 	
+	var urlbrandEsercizi = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONbrandEsercizi.php");
+	var dataName = "jsonBrandEsercizi";
+	var dataClass = ""+window.localStorage.getItem("brandEsercizi")+"";
+	var dataImg = "downloadbrandEsercizi";
+	
+	downloadData(urlbrandEsercizi, dataName, dataClass, dataImg);
+
 	
 	
 	function downloadData(dataUrl, dataName, dataClass, dataImg){
