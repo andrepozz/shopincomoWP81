@@ -894,6 +894,20 @@
 		alert("Status: " + textStatus);
 		alert("Error: " + errorThrown); 
 	}); // ajax
+	
+	var urlnomeEsercizi = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONnomeEsercizi.php");
+	
+	$.ajax({
+		url: urlnomeEsercizi,
+		dataType: 'json',
+		async: false
+	}).done(function(data) {
+		alert("success");
+		window.localStorage.setItem('jsonNomeEsercizi', data);
+	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+		alert("Status: " + textStatus);
+		alert("Error: " + errorThrown); 
+	}); // ajax
 		
 
 		
@@ -922,6 +936,7 @@
 		
 	} //FUNCTION getSottocategorie()
 	
+	
 	//JSON RICERCA PER NOME
 	
 	var urlnomeEsercizi = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONnomeEsercizi.php");	
@@ -930,7 +945,7 @@
 	var pClass = ""+window.localStorage.getItem("nomiEsercizi")+"";
 	var imgName = "nome";
 	
-	downloadJSON(directory, fileNamenomeEsercizi, urlnomeEsercizi, pClass, imgName);
+	//downloadJSON(directory, fileNamenomeEsercizi, urlnomeEsercizi, pClass, imgName);
 	
 	//JSON BRAND ESERCIZI
 	
@@ -940,7 +955,7 @@
 	var pClass = ""+window.localStorage.getItem("brandEsercizi")+"";
 	var imgName = "brandEsercizi";
 	
-	downloadJSON(directory, fileNamebrandEsercizi, urlbrandEsercizi, pClass, imgName);
+	//downloadJSON(directory, fileNamebrandEsercizi, urlbrandEsercizi, pClass, imgName);
 	
 	//JSON RICERCA PER BRAND
 	
@@ -950,7 +965,7 @@
 	var pClass = "brand";
 	var imgName = "brand";
 	
-	downloadJSON(directory, fileNamebrand, urlbrand, pClass, imgName);
+	//downloadJSON(directory, fileNamebrand, urlbrand, pClass, imgName);
 	
 	//JSON POSITION
 	
@@ -960,7 +975,7 @@
 	var pClass = ""+window.localStorage.getItem("position")+"";
 	var imgName = "position";
 	
-	downloadJSON(directory, filePosition, urlposition, pClass, imgName);
+	//downloadJSON(directory, filePosition, urlposition, pClass, imgName);
 	
 	
 	}); // ON "pageshow"

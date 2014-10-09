@@ -74,7 +74,9 @@
 				var re = $input.val();
 				var matcher = new RegExp( re, "i" );
 				
-				$.getJSON(jsonPath, function( data ) {
+				//$.getJSON(jsonPath, function( data ) {
+				
+				var data = window.localStorage.getItem('jsonNomeEsercizi');
 		
 				json_filter = $.grep(data, function(item){
 				return matcher.test(item.nomeEsercizio); 
@@ -94,7 +96,7 @@
 				$ul.listview( "refresh" );
 				$ul.trigger( "updatelayout");
 				
-				});
+				//});
 			}
 		});
 	});
