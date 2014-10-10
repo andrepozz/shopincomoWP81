@@ -366,8 +366,8 @@
 			
 			var distanceVetrina = 5000;
 			//var jsonPositionDir = path + "/position.js";
-			$.getJSON(jsonPositionDir, function( jsonPosition ) {
-				$.each(jsonPosition, function(index, info) {
+			//$.getJSON(jsonPositionDir, function( jsonPosition ) {
+				$.each(jsonPositionDir, function(index, info) {
 					currentDistanceVetrina = getDistanceFromLatLonInKm(userLatitude,userLongitude,info.latEsercizio,info.lonEsercizio);
 					if(distanceVetrina > currentDistanceVetrina)
 					{
@@ -402,7 +402,7 @@
 				$(".distanzaEsercizio").html("<img src='img/distanza.png'>"+window.localStorage.getItem("troppoLontano")+"");
 				}
 			
-			}); //END GET JSON POSITION 
+			//}); //END GET JSON POSITION 
 			
 			var userAccuracy = position.coords.accuracy;
 

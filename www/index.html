@@ -192,6 +192,8 @@
 	estensioneImmagine = "en";
 	}
 	
+	storageSize();
+	
 	$("div#rigaBorsa_1").html("");
 	$("div#rigaBorsa_2").html("");
 	$("div#rigaBorsa_1").append($("<div class='blocco_sx'><a href='eserciziVicini.html' rel='external' data-transition='slide'><img src='img/ricercaDistanza_"+estensioneImmagine+".png'></a></div><div class='blocco_dx'><a href='categorie.html' rel='external' data-transition='slide'><img src='img/ricercaCategoria_"+estensioneImmagine+".png'></a></div>"));
@@ -212,6 +214,17 @@
 	}
 	
 	});
+	
+	function storageSize(){
+	
+	var total = 0;
+	for(var x in localStorage) {
+	  var amount = (localStorage[x].length * 2) / 1024 / 1024;
+	  total += amount;
+	}
+	alert( "Total: " + total.toFixed(2) + " MB");
+	
+	}
 	
 	function checkUpdates(){
 	var	connectionStatus = navigator.onLine ? 'online' : 'offline';
@@ -1817,8 +1830,8 @@
 			
 			var distanceVetrina = 5000;
 			//var jsonPositionDir = path + "/position.js";
-			$.getJSON(jsonPositionDir, function( jsonPosition ) {
-				$.each(jsonPosition, function(index, info) {
+			//$.getJSON(jsonPositionDir, function( jsonPosition ) {
+				$.each(jsonPositionDir, function(index, info) {
 					currentDistanceVetrina = getDistanceFromLatLonInKm(userLatitude,userLongitude,info.latEsercizio,info.lonEsercizio);
 					if(distanceVetrina > currentDistanceVetrina)
 					{
@@ -1853,7 +1866,7 @@
 				$(".distanzaEsercizio").html("<img src='img/distanza.png'>"+window.localStorage.getItem("troppoLontano")+"");
 				}
 			
-			}); //END GET JSON POSITION 
+			//}); //END GET JSON POSITION 
 			
 			var userAccuracy = position.coords.accuracy;
 
