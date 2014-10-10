@@ -1087,7 +1087,7 @@
 	window.localStorage.setItem('lastDownload', lastDownload);
 	
 	$.ajax({	
-		url: "http://shopincomo.comune.como.it/ccn20/JSONidEsercizi.php?start="+startInterval+"&end=50",
+		url: "http://shopincomo.comune.como.it/ccn20/JSONidEsercizi.php?start="+startInterval+"&end=20",
 		dataType: 'json',
 		success: function(data) {
 			$.each(data, function(index, info) {
@@ -1111,7 +1111,7 @@
 		if(countVetrine == numeroEsercizi){
 			$("p.downloadCompleteVetrina").html("<a href='#foursquare' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
 		}
-		if (countVetrine == parseInt(iteration)*50){
+		if (countVetrine == parseInt(iteration)*20){
 			$("div."+iteration+"").css("background","#00CC00");	
 			iteration = parseInt(iteration)+1;
 			startInterval = countVetrine;
