@@ -2319,14 +2319,12 @@
 	
 	<script>   
 	$( "#credits" ).on( "pagebeforeshow", function() {	
-	
-	document.addEventListener("backbutton", function(e){
-    
-		navigator.app.backHistory()
 		
-	}, false);
-	
-	});
+	document.addEventListener("backbutton", onBackKeyDown, false);
+		
+	function onBackKeyDown(e) {
+	e.preventDefault();
+	}
 		
 	</script>
 	
