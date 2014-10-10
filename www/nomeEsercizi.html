@@ -361,8 +361,11 @@
 			window.sessionStorage.setItem("userLatitude", userLatitude);
 			window.sessionStorage.setItem("userLongitude", userLongitude);
 				
+			
+			var jsonPositionDir = JSON.parse(window.localStorage.getItem("jsonPosizioneEsercizi"));
+			
 			var distanceVetrina = 5000;
-			var jsonPositionDir = path + "/position.js";
+			//var jsonPositionDir = path + "/position.js";
 			$.getJSON(jsonPositionDir, function( jsonPosition ) {
 				$.each(jsonPosition, function(index, info) {
 					currentDistanceVetrina = getDistanceFromLatLonInKm(userLatitude,userLongitude,info.latEsercizio,info.lonEsercizio);
@@ -376,7 +379,9 @@
 				console.log(distanceVetrina);
 				if(distanceVetrina < 50)
 				{				
-					var jsonVetrinaSession = JSON.parse(window.sessionStorage.getItem("jsonVetrina"));
+					var idEsercizio = window.sessionStorage.getItem("idEsercizio");
+					var jsonVetrinaSession = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
+					
 					var obj = jsonVetrinaSession[0];
 						if(nearestEsercizio in obj.Distanze){
 						
