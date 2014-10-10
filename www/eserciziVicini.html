@@ -113,9 +113,10 @@
 		controlloDistance.addTo(mapEsercizi);	
 	
 	//CARICA JSON POSITION
-	var path = window.localStorage.getItem("pathSD");
-	var jsonPositionDir = path + "/position.js";
-	//var jsonPositionDir = "js/position.js";
+		//var path = window.localStorage.getItem("pathSD");
+		//var jsonPositionDir = path + "/position.js";
+		//var jsonPositionDir = "js/position.js";
+		var jsonPositionDir = window.localStorage.getItem('jsonPosizioneEsercizi');
 			
 	//CHECK GEOLOCATION
 	if(window.sessionStorage.getItem("userLatitude") == null) {
@@ -141,7 +142,7 @@
 	window.sessionStorage.setItem("userLongitude", userLongitude);
 	window.sessionStorage.setItem("userAccuracy", userAccuracy);
 	
-		$.getJSON(jsonPositionDir, function( jsonPosition ) {
+		//$.getJSON(jsonPositionDir, function( jsonPosition ) {
 	
 		userLatitudeVicini = window.sessionStorage.getItem("userLatitude");
 		userLongitudeVicini = window.sessionStorage.getItem("userLongitude");
@@ -153,7 +154,7 @@
 		var eserciziVicini = [];
 		
 		//NEAREST NODE
-		$.each(jsonPosition, function(index, info) {
+		$.each(JSON.parse(jsonPositionDir), function(index, info) {
 
 			var currentDistance;
 			var currentEsercizio;
@@ -227,7 +228,7 @@
 		mapEsercizi.fitBounds(group.getBounds().pad(0.15));
 	
 	
-	}); // FINE GET JSON POSITION
+	//}); // FINE GET JSON POSITION
 	
 	
     } // END ON SUCCESS
@@ -250,7 +251,7 @@
 	else
 	{
 	
-	$.getJSON(jsonPositionDir, function( jsonPosition ) {
+	//$.getJSON(jsonPositionDir, function( jsonPosition ) {
 
 		userLatitudeVicini = window.sessionStorage.getItem("userLatitude");
 		userLongitudeVicini = window.sessionStorage.getItem("userLongitude");
@@ -262,7 +263,7 @@
 		var eserciziVicini = [];
 		
 		//NEAREST NODE
-		$.each(jsonPosition, function(index, info) {
+		$.each(JSON.parse(jsonPositionDir), function(index, info) {
 
 			var currentDistance;
 			var currentEsercizio;
@@ -336,7 +337,7 @@
 		mapEsercizi.fitBounds(group.getBounds().pad(0.15));
 	
 	
-	}); // FINE GET JSON POSITION
+	//}); // FINE GET JSON POSITION
 	
 	}// END ELSE GEOLOCATION
 		
@@ -351,10 +352,11 @@
 		circleDistance = $(this).attr('circleDistance');
 		$('a.lista').attr('maxDistance', circleDistance);
 		//CARICA JSON POSITION
-		var path = window.localStorage.getItem("pathSD");
-		var jsonPositionDir = path + "/position.js";
-		//var jsonPositionDir = "js/position.js";
-		$.getJSON(jsonPositionDir, function( jsonPosition ) {
+			//var path = window.localStorage.getItem("pathSD");
+			//var jsonPositionDir = path + "/position.js";
+			//var jsonPositionDir = "js/position.js";
+		var jsonPositionDir = window.localStorage.getItem('jsonPosizioneEsercizi');
+		//$.getJSON(jsonPositionDir, function( jsonPosition ) {
 		
 		userLatitudeVicini = window.sessionStorage.getItem("userLatitude");
 		userLongitudeVicini = window.sessionStorage.getItem("userLongitude");
@@ -363,7 +365,7 @@
 		var eserciziVicini = [];
 		
 			//NEAREST NODE
-			$.each(jsonPosition, function(index, info) {
+			$.each(JSON.parse(jsonPositionDir), function(index, info) {
 
 			var currentDistance;
 			var currentEsercizio;
@@ -424,7 +426,7 @@
 			mapEsercizi.fitBounds(group.getBounds().pad(0.15));
 			
 		
-		}); // FINE GET JSON POSITION
+		//}); // FINE GET JSON POSITION
 		
 	}); // FINE ONCLICK CIRCLE DISTANCE
 	
@@ -511,15 +513,18 @@
 	var latUser = window.sessionStorage.getItem("userLatitude");
 	var lonUser = window.sessionStorage.getItem("userLongitude");
 	//CARICA JSON POSITION
-	var path = window.localStorage.getItem("pathSD");
-	var jsonPositionDir = path + "/position.js";
-	//var jsonPositionDir = "js/position.js";
-	$.getJSON(jsonPositionDir, function( jsonPosition ) {
+		//var path = window.localStorage.getItem("pathSD");
+		//var jsonPositionDir = path + "/position.js";
+		//var jsonPositionDir = "js/position.js";
+		
+	var jsonPositionDir = window.localStorage.getItem('jsonPosizioneEsercizi');
+	
+	//$.getJSON(jsonPositionDir, function( jsonPosition ) {
 	
 	var eserciziVicini = [];
 	
 		//NEAREST NODE
-		$.each(jsonPosition, function(index, info) {
+		$.each(JSON.parse(jsonPositionDir), function(index, info) {
 		
 		var currentDistance;
 		var currentEsercizio;
@@ -558,7 +563,7 @@
 		
 		$("ul#listaEsercizi").listview().listview('refresh');
 	
-	}); // FINE GET JSON POSITION
+	//}); // FINE GET JSON POSITION
 	
 	}); 
 	
@@ -587,6 +592,7 @@
 	
 	$(document).on("click", 'a.esercizio', function(){
 		idEsercizio = $(this).attr('idEsercizio');
+		window.sessionStorage.setItem("idEsercizio", idEsercizio);
 	});
 	
 	</script>

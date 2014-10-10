@@ -526,6 +526,7 @@
 	// ON 'click' esercizio
 	$(document).on("click", 'a.esercizio', function(){
 	idEsercizio = $(this).attr('idEsercizio');
+	window.sessionStorage.setItem("idEsercizio", idEsercizio);
 	});
 
 	// ON 'click' pulisci sessione
