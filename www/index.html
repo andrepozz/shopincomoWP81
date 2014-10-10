@@ -1072,24 +1072,28 @@
 	var numeroBlocchiDownload = Math.floor(numeroEsercizi/20);
 	alert(numeroBlocchiDownload);
 	var widthBlocchiDownload = 100/numeroBlocchiDownload;
-	alert(widthBlocchiDownload);
 	var startInterval = 0;
 	var iteration = 1;
 	var countVetrine = 0;
+	
+	window.sessionStorage.setItem("startInterval", 0);
+	window.sessionStorage.setItem("iteration", 1);
 	
 	
 	for (i=1; i<=numeroBlocchiDownload; i++) {
 		$("div.progressBar").append("<div class='"+i+"' style='width:"+widthBlocchiDownload.toFixed(2)+"%; height:40px; float:left'></div>");
 	}
 	
-	downloadVetrine(startInterval, numeroEsercizi, iteration, countVetrine);
+	downloadVetrine(numeroEsercizi);
 	
 
-	function downloadVetrine(startInterval, numeroEsercizi, iteration, countVetrine) {
+	function downloadVetrine(numeroEsercizi) {
 	
 	var lastDownload = new Date();
 	var lastDownload = lastDownload.getTime();
 	window.localStorage.setItem('lastDownload', lastDownload);
+	
+	var startInterval = window.sessionStorage.getItem("startInterval");
 	
 	$.ajax({	
 		url: "http://shopincomo.comune.como.it/ccn20/JSONidEsercizi.php?start="+startInterval+"&end=20",
@@ -1098,7 +1102,7 @@
 			$.each(data, function(index, info) {
 			var urlVetrinaEsercizio = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+info.idEsercizio+"");
 			var dataName = "json"+info.idEsercizio+"";
-			downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration, countVetrine)
+			downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi)
 			});
 		}
 	});
@@ -1107,24 +1111,26 @@
 	
 	
 	
-	function downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration, countVetrine){
+	function downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi){
 	$.getJSON(urlVetrinaEsercizio)
 	.done(function(data) {
 		countVetrine = parseInt(countVetrine)+1;
 		alert(countVetrine);
+		window.sessionStorage.setItem("startInterval", countVetrine);
+		
 		window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 		if(countVetrine == numeroEsercizi){
 			$("p.downloadCompleteVetrina").html("<a href='#foursquare' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
 		}
 		if (countVetrine == parseInt(iteration)*20){
-			alert("iteration "+iteration);
 			$("div."+iteration+"").css("background","#00CC00");	
 			iteration = parseInt(iteration)+1;
-			startInterval = countVetrine;
-			downloadVetrine(startInterval, numeroEsercizi, iteration);
+			alert("iteration "+iteration);
+			window.sessionStorage.setItem("iteration", iteration);
+			downloadVetrine(numeroEsercizi);
 		}			
 	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
-		downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration, countVetrine)
+		downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi)
 	}); // ajax
 	
 	}
