@@ -1070,7 +1070,9 @@
 	var numeroEsercizi = jsonIdEsercizi.length;
 	var codLingua = window.localStorage.getItem('codLingua');
 	var numeroBlocchiDownload = Math.floor(numeroEsercizi/20);
+	alert(numeroBlocchiDownload);
 	var widthBlocchiDownload = 100/numeroBlocchiDownload;
+	alert(widthBlocchiDownload);
 	var startInterval = 0;
 	var iteration = 1;
 	
@@ -1078,6 +1080,8 @@
 	for (i=1; i<=numeroBlocchiDownload; i++) {
 		$("div.progressBar").append("<div class='"+i+"' style='width:"+widthBlocchiDownload.toFixed(2)+"%; height:40px; float:left'></div>");
 	}
+	
+	downloadVetrine(startInterval, numeroEsercizi, iteration);
 	
 
 	function downloadVetrine(startInterval, numeroEsercizi, iteration) {
