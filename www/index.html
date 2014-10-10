@@ -62,7 +62,8 @@
 	$(".closePopupUpdateDisponibili").html(""+window.localStorage.getItem("chiudi")+"");
 		
 	var lingua = window.localStorage.getItem("lingua");
-	if (lingua == null) {
+	var updateWindows81 = window.localStorage.getItem("updateWindows81");
+	if (lingua == null || updateWindows81 == null) {
 	
 			document.addEventListener("deviceready", function(){
 			if (device.platform === "WinCE" || device.platform === "Win32NT") {
@@ -786,6 +787,7 @@
 		
 		window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 		if(countVetrine == numeroEsercizi){
+			window.sessionStorage.setItem("updateWindows81", 1);
 			$("p.downloadCompleteVetrina").html("<a href='#foursquare' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
 		}
 		else if (countVetrine == parseInt(iteration)*20){
