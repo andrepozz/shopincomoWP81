@@ -1069,22 +1069,56 @@
 	var jsonIdEsercizi = JSON.parse(window.localStorage.getItem("jsonNomeEsercizi"));
 	var numeroEsercizi = jsonIdEsercizi.length;
 	var codLingua = window.localStorage.getItem('codLingua');
-	var widthBlocchiDownload = 100/numeroEsercizi;
+	var numeroBlocchiDownload = Math.floor(numeroEsercizi/20);
+	var widthBlocchiDownload = 100/numeroBlocchiDownload;
+	var startInterval = 0;
+	var iteration = 1;
 	
-	$.each(jsonIdEsercizi, function(index,info) {
-	var urlVetrinaEsercizio = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+info.idEsercizio+"");
-	var dataName = "json"+info.idEsercizio+"";
-	downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName);
+	
+	for (i=1; i<=numeroBlocchiDownload; i++) {
+		$("div.progressBar").append("<div class='"+i+"' style='width:"+widthBlocchiDownload.toFixed(2)+"%; height:40px; float:left'></div>");
+	}
+	
+
+	function downloadVetrine(startInterval, numeroEsercizi, iteration) {
+	
+	var lastDownload = new Date();
+	var lastDownload = lastDownload.getTime();
+	window.localStorage.setItem('lastDownload', lastDownload);
+	
+	$.ajax({	
+		url: "http://shopincomo.comune.como.it/ccn20/JSONidEsercizi.php?start="+startInterval+"&end=50",
+		dataType: 'json',
+		success: function(data) {
+			$.each(data, function(index, info) {
+			var urlVetrinaEsercizio = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+info.idEsercizio+"");
+			var dataName = "json"+info.idEsercizio+"";
+			downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration)
+			});
+		}
 	});
 	
-	function downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName){
+	}//FUNCTION INTERVAL VETRINE
+	
+	
+	
+	function downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration){
 	
 	$.getJSON(urlVetrinaEsercizio)
 	.done(function(data) {
+		countVetrine = parseInt(countVetrine)+1;
 		window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
-		$("div.progressBar").append("<div class='"+i+"' style='width:"+widthBlocchiDownload.toFixed(2)+"%; height:40px; float:left; background: #00CC00'></div>");			
+		if(countVetrine == numeroEsercizi){
+			$("p.downloadCompleteVetrina").html("<a href='#foursquare' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
+		}
+		if (countVetrine == parseInt(iteration)*50){
+			$("div."+iteration+"").css("background","#00CC00");	
+			iteration = parseInt(iteration)+1;
+			startInterval = countVetrine;
+			downloadVetrine(startInterval, numeroEsercizi, iteration);
+		}			
 	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
-		downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName)
+		downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration)
 	}); // ajax
 	
 	}
