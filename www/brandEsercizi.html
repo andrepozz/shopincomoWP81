@@ -418,24 +418,14 @@
 		$("ul.listaSocial").append($('<li id="buttonTwitter"><a href="#" class="votaTwitter" idEsercizio=""><img id="votaTwitter" src=""><h2>Twitter</h2><p class="didascaliaSocial"></p></a></li>'));
 		$("ul.listaSocial").listview("refresh");
 	}
-
 	
 	// CARICA FILE VETRINA
-	var path = window.localStorage.getItem("pathSD");
-	var jsonPath = path + "/esercizi/"+idEsercizio+".js";
-	//var jsonPath = "js/16.js";
-	var jsonVetrina;
+		//var path = window.localStorage.getItem("pathSD");
+		//var jsonPath = path + "/esercizi/"+idEsercizio+".js";
+		//var jsonPath = "js/16.js";
+	var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
 		
-	$.ajax({
-		url: jsonPath,
-		dataType: 'json',
-		async: false,
-		success: function(data) {
-		jsonVetrina = data;
-		sessionStorage.setItem('jsonVetrina', JSON.stringify(jsonVetrina));
-		}
-	}); // ajax
-	
 	// NOME ESERCIZIO + INDIRIZZO + DESCRIZIONE
 	var esercizioLatitude;
 	var esercizioLongitude;
@@ -634,8 +624,11 @@
 			window.sessionStorage.setItem("userLatitude", userLatitude);
 			window.sessionStorage.setItem("userLongitude", userLongitude);
 				
+			
+			var jsonPositionDir = JSON.parse(window.localStorage.getItem("jsonPosizioneEsercizi"));
+			
 			var distanceVetrina = 5000;
-			var jsonPositionDir = path + "/position.js";
+			//var jsonPositionDir = path + "/position.js";
 			$.getJSON(jsonPositionDir, function( jsonPosition ) {
 				$.each(jsonPosition, function(index, info) {
 					currentDistanceVetrina = getDistanceFromLatLonInKm(userLatitude,userLongitude,info.latEsercizio,info.lonEsercizio);
@@ -649,7 +642,9 @@
 				console.log(distanceVetrina);
 				if(distanceVetrina < 50)
 				{				
-					var jsonVetrinaSession = JSON.parse(window.sessionStorage.getItem("jsonVetrina"));
+					var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+					var jsonVetrinaSession = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
+					
 					var obj = jsonVetrinaSession[0];
 						if(nearestEsercizio in obj.Distanze){
 						
@@ -700,7 +695,6 @@
 				if (device.platform === "WinCE" || device.platform === "Win32NT") {
 					console.log("no position");
 				}
-				  
 			}
 			
 		}
@@ -727,6 +721,10 @@
 		if (device.platform === "iOS") {
 			window.location.href = "maps:q="+geoPosition+"";
 		}
+		
+		if (device.platform === "WinCE" || device.platform === "Win32NT") {
+			window.location.href = "maps:"+geoPosition+"";
+		}
 	});
 	
 // CLICK TRANSLATE GOOGLE
@@ -737,12 +735,6 @@
 		var urlTranslate = encodeURI("http://translate.google.com/#"+linguaDescrizione+"/"+codLingua+"/"+descrizioneTranslate+"");
 		var ref = window.open(urlTranslate, '_blank', 'location=yes');
 		//ref.addEventListener('loadstart', function() { alert(event.url); });
-	});
-	
-// CLICK BACK TO LISTA ESERCIZI
-	$(document).on("click", '#ritornoLista', function(){
-		ritorno = "ok";
-		window.sessionStorage.setItem("ritorno", ritorno);
 	});
 	
 // FUNZIONE DISTANZA NEAREST NODE
@@ -837,8 +829,7 @@
 		var latitude = window.sessionStorage.getItem("userLatitude");
 		var longitude = window.sessionStorage.getItem("userLongitude");
 		var nomeEsercizioFoursquare = $("h3.nomeEsercizio").html();
-		var tokenFoursquare = window.localStorage.getItem("tokenFoursquare");		
-									
+		var tokenFoursquare = window.localStorage.getItem("tokenFoursquare");							
 		$.getJSON('https://api.foursquare.com/v2/venues/search?ll='+latitude+','+longitude+'&limit=4&query='+nomeEsercizioFoursquare+'&radius=100&oauth_token='+tokenFoursquare+'&v=20140410',
 			function(data) {
 			venues = data.response.venues;
@@ -925,9 +916,10 @@
     });
 		
 	});
-		
-	</script>
 	
+	
+	
+	</script>
 	<ul data-role="listview" data-inset="true" style="background:fd613d" class="listaMappa">
     <li style="background:#fd613d">
 	<h3 class="nomeEsercizio" style="color:white; text-shadow:none"></h3>
@@ -991,7 +983,7 @@
 
 	<div data-role="header" data-position="fixed" data-tap-toggle="false">
 		<h1></h1>
-		<a href="#eserciziBrand" id="ritornoLista" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="#nomeEsercizi" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 	</div><!-- /header -->
 
@@ -1007,14 +999,15 @@
 		function onBackKeyDown(e) {
 		e.preventDefault();
 		}
-	
-	var jsonVetrina = window.sessionStorage.getItem("jsonVetrina");
-	
+		
 	// NOME ESERCIZIO + ORARI ESERCIZIO
 	
 	$("ul#orariEsercizio").html("");
 	
-	$.each(JSON.parse(jsonVetrina), function(index, info) {
+	var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
+	
+	$.each(jsonVetrina, function(index, info) {
 				
 		if (info.mostraOrari == "si"){
 		$("ul#orariEsercizio").append($("<li data-role='list-divider'>"+window.localStorage.getItem("orariApertura")+"</li>"));
@@ -1038,12 +1031,6 @@
 	
 	});
 	// /PAGEBEFORESHOW
-	
-	// CLICK BACK TO LISTA ESERCIZI
-	$(document).on("click", '#ritornoLista', function(){
-		ritorno = "ok";
-		window.sessionStorage.setItem("ritorno", ritorno);
-	});
 	
 	
 	</script>
@@ -1077,7 +1064,7 @@
 
 	<div data-role="header" data-position="fixed" data-tap-toggle="false">
 		<h1></h1>
-		<a href="#eserciziBrand" id="ritornoLista" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="#nomeEsercizi" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 	</div><!-- /header -->
 
@@ -1094,13 +1081,14 @@
 		e.preventDefault();
 		}
 	
-	var jsonVetrina = window.sessionStorage.getItem("jsonVetrina");
+	var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
 	
 	// NOME ESERCIZIO + CONTATTI ESERCIZIO
 	
 	$("ul#contattiEsercizio").html("");
 	
-	$.each(JSON.parse(jsonVetrina), function(index, info) {
+	$.each(jsonVetrina, function(index, info) {
 				
 		$("ul#contattiEsercizio").append($("<li data-role='list-divider'>"+window.localStorage.getItem("contatti")+"</li>"));
 		$("ul#contattiEsercizio").append($("<li>"+info.Indirizzo+" "+info.Citta+"</li>"));
@@ -1128,16 +1116,8 @@
 		var ref = window.open(urlTranslate, '_blank', 'location=yes');
 	});
 	
-	// CLICK BACK TO LISTA ESERCIZI
-	$(document).on("click", '#ritornoLista', function(){
-		ritorno = "ok";
-		window.sessionStorage.setItem("ritorno", ritorno);
-	});
-	
-	
-	
 	</script>
-	
+		
 	<!-- CONTATTI ESERCIZIO -->
 	<ul id="contattiEsercizio" data-role="listview" data-inset="true">
 	</ul>
@@ -1166,9 +1146,9 @@
 <!-- Start of page: #vetrinaStatistiche -->
 <div data-role="page" id="vetrinaStatistiche">
 
-	<div data-role="header">
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
 		<h1></h1>
-		<a href="#eserciziBrand" id="ritornoLista" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
+		<a href="#nomeEsercizi" class="ui-btn ui-icon-carat-l ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 		<a href="index.html" rel="external" class="ui-btn ui-icon-home ui-btn-icon-notext ui-alt-icon ui-nodisc-icon" data-transition="slide" data-direction="reverse">indietro</a>
 	</div><!-- /header -->
 
@@ -1190,14 +1170,15 @@
 	$(".intervalli").append($('<button class="ui-btn" id="intervallo"value="15giorni">15 '+window.localStorage.getItem("giorni")+'</button>'));
 	$(".intervalli").append($('<button class="ui-btn" id="intervallo" value="30giorni">30 '+window.localStorage.getItem("giorni")+'</button>'));
 	
-	var jsonVetrina = window.sessionStorage.getItem("jsonVetrina");
+	var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
 	
 	// NOME ESERCIZIO + STATISTICHE
 	
 	var checkStatistiche;
 	var idEsercizio;
 	
-		$.each(JSON.parse(jsonVetrina), function(index, info) {
+		$.each(jsonVetrina, function(index, info) {
 				
 			$("h3.nomeEsercizio").html(info.NomeEsercizio);
 			idEsercizio = info.idEsercizio;
@@ -1436,12 +1417,6 @@
 	
 	});
 	// /PAGEBEFORESHOW
-	
-	// CLICK BACK TO LISTA ESERCIZI
-	$(document).on("click", '#ritornoLista', function(){
-		ritorno = "ok";
-		window.sessionStorage.setItem("ritorno", ritorno);
-	});
 
 	</script>
 	
