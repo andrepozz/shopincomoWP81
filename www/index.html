@@ -1107,15 +1107,18 @@
 	
 	
 	function downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration){
-	
+	alert(numeroEsercizi);
+	alert(iteration);
 	$.getJSON(urlVetrinaEsercizio)
 	.done(function(data) {
 		countVetrine = parseInt(countVetrine)+1;
+		alert(countVetrine);
 		window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 		if(countVetrine == numeroEsercizi){
 			$("p.downloadCompleteVetrina").html("<a href='#foursquare' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
 		}
 		if (countVetrine == parseInt(iteration)*20){
+			alert("iteration "+iteration);
 			$("div."+iteration+"").css("background","#00CC00");	
 			iteration = parseInt(iteration)+1;
 			startInterval = countVetrine;
