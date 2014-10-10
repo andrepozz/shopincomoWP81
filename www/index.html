@@ -1123,6 +1123,7 @@
 		window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 		if(countVetrine == numeroEsercizi){
 			$("p.downloadCompleteVetrina").html("<a href='#foursquare' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
+			storageSize();
 		}
 		else if (countVetrine == parseInt(iteration)*20){
 			$("div."+iteration+"").css("background","#00CC00");	
@@ -1133,6 +1134,17 @@
 	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
 		downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi)
 	}); // ajax
+	
+	}
+	
+	function storageSize(){
+	
+	var total = 0;
+	for(var x in localStorage) {
+	  var amount = (localStorage[x].length * 2) / 1024 / 1024;
+	  total += amount;
+	}
+	alert( "Total: " + total.toFixed(2) + " MB");
 	
 	}
 	
