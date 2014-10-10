@@ -585,9 +585,9 @@
 	$("ul.downloadList").append($('<li class="brand"><img class="iconaTipologia" src="img/downloadbrand.png"> DOWNLOAD brand... <img src="img/download.gif"></li>'));
 	$("ul.downloadList").append($('<li class="'+window.localStorage.getItem("brandEsercizi")+'"><img class="iconaTipologia" src="img/downloadbrandEsercizi.png"> DOWNLOAD '+window.localStorage.getItem("brandEsercizi")+'... <img src="img/download.gif"></li>'));
 	$("ul.downloadList").append($('<li class="'+window.localStorage.getItem("position")+'"><img class="iconaTipologia" src="img/downloadposition.png"> DOWNLOAD position... <img src="img/download.gif"></li>'));
-	$("ul.downloadList").append($('<li class="categorie"><img class="iconaTipologia" src="img/downloadCategorie.png"> DOWNLOAD '+window.localStorage.getItem("categorie")+'...<img src="img/download.gif"></li>'));
-	$("ul.downloadList").append($('<li class="sottocategorie"><img class="iconaTipologia" src="img/downloadSottocategorie.png"> DOWNLOAD '+window.localStorage.getItem("sottoCategorie")+'...<img src="img/download.gif"></li>'));
-	
+	$("ul.downloadList").append($('<li class="'+window.localStorage.getItem("categorie")+'"><img class="iconaTipologia" src="img/downloadCategorie.png"> DOWNLOAD '+window.localStorage.getItem("categorie")+'...<img src="img/download.gif"></li>'));
+	$("ul.downloadList").append($('<li class="'+window.localStorage.getItem("sottoCategorie")+'"><img class="iconaTipologia" src="img/downloadSottocategorie.png"> DOWNLOAD '+window.localStorage.getItem("sottoCategorie")+'...<img src="img/download.gif"></li>'));
+	$("p.downloadComplete").html("");
 	var codLingua = window.localStorage.getItem('codLingua');
 	var downloadCompletati = 0;
 
@@ -773,6 +773,8 @@
 	}
 	
 	$("h3.titoloDownloadEsercizi").html(window.localStorage.getItem("downloadEsercizi"));
+	$("div.progressBar").html("");
+	$("p.downloadCompleteVetrina").html("");
 	
 	var jsonIdEsercizi = JSON.parse(window.localStorage.getItem("jsonNomeEsercizi"));
 	var numeroEsercizi = jsonIdEsercizi.length;
@@ -938,6 +940,7 @@
 					
 		$.getJSON(jsonUpdate)
 		.done(function(data) {
+			var numeroAggiornamenti = data.length;
 			if(data.length == 0)
 			{
 				$("p.countUpdates").html(""+window.localStorage.getItem("statusDatabase")+"");
