@@ -160,8 +160,8 @@
 		//var path = window.localStorage.getItem("pathSD");
 		//var jsonPath = path + "/esercizi/"+idEsercizio+".js";
 		//var jsonPath = "js/16.js";
-	var idEsercizio = window.sessionStorage.getItem("idEsercizio");
-	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
+	var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
 		
 	// NOME ESERCIZIO + INDIRIZZO + DESCRIZIONE
 	var esercizioLatitude;
@@ -379,8 +379,8 @@
 				console.log(distanceVetrina);
 				if(distanceVetrina < 50)
 				{				
-					var idEsercizio = window.sessionStorage.getItem("idEsercizio");
-					var jsonVetrinaSession = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
+					var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+					var jsonVetrinaSession = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
 					
 					var obj = jsonVetrinaSession[0];
 						if(nearestEsercizio in obj.Distanze){
@@ -741,8 +741,8 @@
 	
 	$("ul#orariEsercizio").html("");
 	
-	var idEsercizio = window.sessionStorage.getItem("idEsercizio");
-	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
+	var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
 	
 	$.each(jsonVetrina, function(index, info) {
 				
@@ -818,8 +818,8 @@
 		e.preventDefault();
 		}
 	
-	var idEsercizio = window.sessionStorage.getItem("idEsercizio");
-	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
+	var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
 	
 	// NOME ESERCIZIO + CONTATTI ESERCIZIO
 	
@@ -907,8 +907,8 @@
 	$(".intervalli").append($('<button class="ui-btn" id="intervallo"value="15giorni">15 '+window.localStorage.getItem("giorni")+'</button>'));
 	$(".intervalli").append($('<button class="ui-btn" id="intervallo" value="30giorni">30 '+window.localStorage.getItem("giorni")+'</button>'));
 	
-	var idEsercizio = window.sessionStorage.getItem("idEsercizio");
-	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
+	var idEsercizioVetrina = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizioVetrina+""));
 	
 	// NOME ESERCIZIO + STATISTICHE
 	
