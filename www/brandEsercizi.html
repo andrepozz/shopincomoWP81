@@ -57,8 +57,9 @@
 		$("p.descrizioneRicercaBrand").html(""+window.localStorage.getItem("placeholderBrand")+"");
 		
 	//CARICA JSON CATEGORIE
-	var path = window.localStorage.getItem("pathSD");
-	var jsonPath = path + "/brand.js";
+		//var path = window.localStorage.getItem("pathSD");
+		//var jsonPath = path + "/brand.js";
+	var jsonBrand = window.localStorage.getItem('jsonBrand');
 	
 		$( "#cerca_negozio" ).on( "filterablebeforefilter", function ( e, data ) {
 			var $ul = $( this ),
@@ -73,9 +74,9 @@
 				var re = $input.val();
 				var matcher = new RegExp( re, "i" );
 				
-				$.getJSON(jsonPath, function( data ) {
+				//$.getJSON(jsonPath, function( data ) {
 		
-				json_filter = $.grep(data, function(item){
+				json_filter = $.grep(JSON.parse(jsonBrand), function(item){
 				return matcher.test(item.nomeBrand); 
 				}) 
 			
@@ -93,7 +94,7 @@
 				$ul.listview( "refresh" );
 				$ul.trigger( "updatelayout");
 				
-				});
+				//});
 				
 			}
 		});
@@ -103,6 +104,8 @@
 		
 	idBrand = $(this).attr('idBrand');
 	brand = $(this).attr('brand');
+	window.sessionStorage.setItem("idBrand", idBrand);
+	window.sessionStorage.setItem("brand", brand);
 	
 	});
 	</script>
@@ -143,12 +146,15 @@
 	$("#fieldsetOrdinamento").controlgroup("container").append($('<input type="radio" class="ordinamento" name="ordinamento" id="votoTrendy" value="votoTrendy"><label for="votoTrendy">'+window.localStorage.getItem("votoTrendy")+'</label>'));
 	$("#fieldsetOrdinamento").enhanceWithin().controlgroup("refresh");
 	
-	//CARICA JSON CATEGORIE
+	//CARICA JSON BRAND ESERCIZI
 		
-	var path = window.localStorage.getItem("pathSD");
-	var jsonPath = path + "/brandEsercizi.js";
-	alert(jsonPath);
+		//var path = window.localStorage.getItem("pathSD");
+		//var jsonPath = path + "/brandEsercizi.js";
+	var jsonPath = JSON.parse(window.localStorage.getItem("jsonBrandEsercizi"));
+	var idBrand = window.sessionStorage.getItem("idBrand");
+	var brand = window.sessionStorage.getItem("brand");
 	
+	/*
 	$.ajax({
 	url: jsonPath,
 	dataType: 'json',
@@ -157,6 +163,7 @@
 		jsonPath = data;
 		}
 	});
+	*/
 		
 	if(window.sessionStorage.getItem("userLatitude") == null) {
 	
