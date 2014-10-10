@@ -200,16 +200,14 @@
 	
 	document.addEventListener("deviceready", function(){
 	
-	$('#index').append('<div data-role="footer" data-position="fixed" data-tap-toggle="false"><div data-role="navbar"><ul><li><a href="#" class="qrCode"><img src="img/qrcode.png"></a></li><li><a href="opzioni.html" rel="external" data-transition="slide"><img src="img/opzioni.png"></a></li><li><a href="#credits" data-transition="flip"><img src="img/info.png"></a></li></ul></div></div>').trigger( "create" ); 	
 	
-	/*
 	if (device.platform === "Android" || device.platform === "iOS") {
 	$('#index').append('<div data-role="footer" data-position="fixed" data-tap-toggle="false"><div data-role="navbar"><ul><li><a href="#" class="qrCode"><img src="img/qrcode.png"></a></li><li><a href="opzioni.html" rel="external" data-transition="slide"><img src="img/opzioni.png"></a></li><li><a href="#credits" data-transition="flip"><img src="img/info.png"></a></li></ul></div></div>').trigger( "create" ); 	
 	}
 	if (device.platform === "WinCE" || device.platform === "Win32NT") {	
 	$('#index').append('<div data-role="footer" data-position="fixed" data-tap-toggle="false"><div data-role="navbar"><ul><li><a href="opzioni.html" rel="external" data-transition="slide"><img src="img/opzioni.png"></a></li><li><a href="#credits" data-transition="flip"><img src="img/info.png"></a></li></ul></div></div>').trigger( "create" );
 	}
-	*/
+	
 	}, false);
 
 	
@@ -230,409 +228,59 @@
 	*/
 	
 	function checkUpdates(){
-	var	connectionStatus = navigator.onLine ? 'online' : 'offline';
-	if (connectionStatus == "online" && window.sessionStorage.getItem("doneCheckUpdates") != "si")
-	{
+		var	connectionStatus = navigator.onLine ? 'online' : 'offline';
+		if (connectionStatus == "online" && window.sessionStorage.getItem("doneCheckUpdates") != "si")
+		{
+			timeoutUpdate();
+			eserciziUpdate();
 		
-		timeoutUpdate();
-		
-		$.mobile.loading( "show", {
-            text: "Check Updates",
-            textVisible: true,
-            theme: "a",
-            textonly: false
-		});
+			$.mobile.loading( "show", {
+				text: "Check Updates",
+				textVisible: true,
+				theme: "a",
+				textonly: false
+			});
 	
-	//CHECK ESISTENZA FILE DI SISTEMA
+		}
+	} //FINE CHECK UPDATES
 		
-		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
+	function eserciziUpdate(){
+
+					
+		var dataDownload = Math.round(localStorage.getItem("lastDownload")/ 1000);
+		localStorage.setItem("dataDownload", dataDownload );
+		var jsonUpdate = "http://shopincomo.comune.como.it/ccn20/JSONidEserciziUpdate.php?language="+localStorage.getItem("codLingua")+"&dataDownload="+dataDownload;
+					
+		$.getJSON(jsonUpdate)
+		.done(function(data) {
+			if(data.length == 0)
+			{
+				localStorage.setItem("numeroAggiornamenti", 0);
+				var doneCheckUpdates = "si"
+				window.sessionStorage.setItem("doneCheckUpdates", doneCheckUpdates);
+				$.mobile.loading( "hide" );
+			}
+			else {
+				numeroAggiornamenti = data.length;
+				localStorage.setItem("numeroAggiornamenti", numeroAggiornamenti);
+				$( "#updateDisponibili" ).popup("open");
+				var doneCheckUpdates = "si"
+				window.sessionStorage.setItem("doneCheckUpdates", doneCheckUpdates);
+				$.mobile.loading( "hide" );
+			}
 			
-			
-			fileSystem.root.getDirectory("ShopInComo", {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
-
-				function onGetDirectorySuccess(dirEntry){
-								
-						if (device.platform === "Android") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-						
-						if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-								
-						if (device.platform === "iOS") {
-							dirEntry.setMetadata(onSetMetadataDirectorySuccess(dirEntry), onSetMetadataDirectoryFail, { "com.apple.MobileBackup": 1});
-						}
-								
-				} // close onGetDirectorySuccess
-
-				function onGetDirectoryFail(){
-
-				console.log("Fail to get directory");
-
-				} // close onGetDirectoryFail
-
-				function onSetMetadataDirectorySuccess(dirEntry){
-				
-
-				// Get a directory reader
-				var directoryReader = dirEntry.createReader();
-				
-				// Get a list of all the entries in the directory
-				directoryReader.readEntries(success,fail);
-				
-				function success(entries) {
-				
-					var fileSistema = ["brandEsercizi.js","brand.js","categorie.js","nomeEsercizi.js","position.js","esercizi","categorie"];		
+		}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+			eserciziUpdate(); 
+		}); // ajax
 					
-					var fileSistemaMancanti = [];
-										
-					for (var i=0;i<fileSistema.length;i++) {
-						rv = false;
-							for (var j=0;j<entries.length;j++) {
-								rv = rv ||  fileSistema[i] == entries[j].name;
-							}
-							if(!rv)
-							{
-								fileSistemaMancanti.push(fileSistema[i]);
-							}
-					}
-
-					checkCategorie(fileSistemaMancanti);
-										
-				}
-
-				function fail(error) {
-					console.log("Failed to list directory contents: " + error.code);
-				}
-
-				} // close onSetMetadataDirectorySuccess
-
-				function onSetMetadataDirectoryFail(){
-
-				console.log("Fail to set metadata directory");
-
-				} // close onSetMetadataDirectoryFail
-			
-		}); // end of window.requestFileSystem
-		
-	// CHECK ESISTENZA CATEGORIE
-
-	function checkCategorie(fileSistemaMancanti){
-		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-			fileSystem.root.getDirectory("ShopInComo/categorie", {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
-
-				function onGetDirectorySuccess(dirEntry){
-								
-						if (device.platform === "Android") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-						
-						if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-								
-						if (device.platform === "iOS") {
-							dirEntry.setMetadata(onSetMetadataDirectorySuccess(dirEntry), onSetMetadataDirectoryFail, { "com.apple.MobileBackup": 1});
-						}
-								
-				} // close onGetDirectorySuccess
-
-				function onGetDirectoryFail(){
-
-				console.log("Fail to get directory");
-
-				} // close onGetDirectoryFail
-
-				function onSetMetadataDirectorySuccess(dirEntry){
-
-				// Get a directory reader
-				var directoryReader = dirEntry.createReader();
-
-				// Get a list of all the entries in the directory
-				directoryReader.readEntries(success,fail);
-				
-				function success(entries) {
-					var path = window.localStorage.getItem("pathSD");
-					var jsonPath = path + "/categorie.js";
-					var fileCategorieMancanti = [];		
-					$.getJSON(jsonPath, function( listaCategorie ) {
-						var fileCategorie = [];
-						$.each(listaCategorie, function(index, info) {
-						
-							fileCategorie.push({
-							jsonNameCategorie: info.jsonName
-							});
-
-						
-						});
-					
-					for (var i=0;i<fileCategorie.length;i++) {
-					rv = false;
-					for (var j=0;j<entries.length;j++) {
-					rv = rv ||  fileCategorie[i].jsonNameCategorie == entries[j].name.substring(0, entries[j].name.length - 3);
-					}
-					if(!rv)
-					{
-					fileCategorieMancanti.push(fileCategorie[i].jsonNameCategorie);
-					}
-					}
-					//eserciziUpdate(fileCategorieMancanti);
-					checkVetrine(fileSistemaMancanti, fileCategorieMancanti);
-					//window.sessionStorage.setItem("fileEserciziMancanti", JSON.stringify(fileEserciziMancanti));
-					});
-					
-				}
-
-				function fail(error) {
-					console.log("Failed to list directory contents: " + error.code);
-				}
-
-				} // close onSetMetadataDirectorySuccess
-
-				function onSetMetadataDirectoryFail(){
-
-				console.log("Fail to set metadata directory");
-
-				} // close onSetMetadataDirectoryFail
-			
-		}); // end of window.requestFileSystem
-		
-	} // END FUNCTION CHECK CATEGORIE
-
-	// CHECK ESISTENZA VETRINE
-	function checkVetrine(fileSistemaMancanti, fileCategorieMancanti) {	
-		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-			
-			fileSystem.root.getDirectory("ShopInComo/esercizi", {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
-
-				function onGetDirectorySuccess(dirEntry){
-
-								
-						if (device.platform === "Android") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-						
-						if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-								
-						if (device.platform === "iOS") {
-							dirEntry.setMetadata(onSetMetadataDirectorySuccess(dirEntry), onSetMetadataDirectoryFail, { "com.apple.MobileBackup": 1});
-						}
-								
-				} // close onGetDirectorySuccess
-
-				function onGetDirectoryFail(){
-
-				console.log("Fail to get directory");
-
-				} // close onGetDirectoryFail
-
-				function onSetMetadataDirectorySuccess(dirEntry){
-			
-				// Get a directory reader
-				var directoryReader = dirEntry.createReader();
-
-				// Get a list of all the entries in the directory
-				directoryReader.readEntries(success,fail);
-				
-				function success(entries) {
-					var path = window.localStorage.getItem("pathSD");
-					var jsonPath = path + "/nomeEsercizi.js";
-
-					var fileEserciziMancanti = [];		
-					$.getJSON(jsonPath, function( listaEsercizi ) {
-						var idEsercizi = [];
-						$.each(listaEsercizi, function(index, info) {
-						
-							idEsercizi.push({
-							idEsercizio: info.idEsercizio
-							});
-
-						
-						});
-					
-					for (var i=0;i<idEsercizi.length;i++) {
-					rv = false;
-					for (var j=0;j<entries.length;j++) {
-					rv = rv ||  parseInt(idEsercizi[i].idEsercizio) == parseInt(entries[j].name.substring(0, entries[j].name.length - 3));
-					}
-					if(!rv)
-					{
-					fileEserciziMancanti.push(idEsercizi[i].idEsercizio);
-					}
-					}
-					eserciziUpdate(fileSistemaMancanti, fileCategorieMancanti, fileEserciziMancanti);
-					window.sessionStorage.setItem("fileEserciziMancanti", JSON.stringify(fileEserciziMancanti));
-					});
-					
-				}
-
-				function fail(error) {
-					console.log("Failed to list directory contents: " + error.code);
-				}
-
-				} // close onSetMetadataDirectorySuccess
-
-				function onSetMetadataDirectoryFail(){
-
-				console.log("Fail to set metadata directory");
-
-				} // close onSetMetadataDirectoryFail
-			
-		}); // end of window.requestFileSystem
-	
-	} // END FUNCTION CHECK VETRINE
-		
-	function eserciziUpdate(fileSistemaMancanti, fileCategorieMancanti, fileEserciziMancanti){
-
-		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-			
-			fileSystem.root.getDirectory("ShopInComo", {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
-
-
-				function onGetDirectorySuccess(dirEntry){
-
-					//MEMORIZZA PATH
-					var directory = dirEntry.fullPath;
-								
-						if (device.platform === "Android") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-						
-						if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataDirectorySuccess(dirEntry);
-						}
-								
-						if (device.platform === "iOS") {
-							dirEntry.setMetadata(onSetMetadataDirectorySuccess(dirEntry), onSetMetadataDirectoryFail, { "com.apple.MobileBackup": 1});
-						}
-								
-				} // close onGetDirectorySuccess
-
-				function onGetDirectoryFail(){
-
-				console.log("Fail to get directory");
-
-				} // close onGetDirectoryFail
-
-				function onSetMetadataDirectorySuccess(dirEntry){
-				
-				dirEntry.getFile("categorie.js", {create: true, exclusive: false}, onGetFileSuccess, onGetFileFail);
-
-				} // close onSetMetadataDirectorySuccess
-
-				function onSetMetadataDirectoryFail(){
-
-				console.log("Fail to set metadata directory");
-
-				} // close onSetMetadataDirectoryFail
-
-
-				function onGetFileSuccess(fileEntry){
-
-					if (device.platform === "iOS") {
-						fileEntry.setMetadata(onSetMetadataFileSuccess(fileEntry), onSetMetadataFileFail, { "com.apple.MobileBackup": 1});
-					}
-					
-					if (device.platform === "WinCE" || device.platform === "Win32NT") {
-							onSetMetadataFileSuccess(fileEntry);
-					}
-
-					if (device.platform === "Android") {
-						onSetMetadataFileSuccess(fileEntry);
-					}
-
-				} // close onGetFileSuccess
-
-				function onGetFileFail(){
-
-					console.log("Fail to get file");
-
-				} // close onGetFileFail
-
-				function onSetMetadataFileSuccess(fileEntry){
-									
-					fileEntry.getMetadata(function(metadata) {
-					
-					if (device.platform === "iOS" || device.platform === "Android") {
-						var dataDownload = Date.parse(metadata.modificationTime) / 1000;
-					}
-					
-					if (device.platform === "WinCE" || device.platform === "Win32NT") {
-						var dataDownload = Math.round(localStorage.getItem("lastDownload")/ 1000);
-					}
-					
-					
-					localStorage.setItem("dataDownload", dataDownload );
-					
-					var urlJSON = "http://shopincomo.comune.como.it/ccn20/JSONidEserciziUpdate.php?language="+localStorage.getItem("codLingua")+"&dataDownload="+dataDownload;
-						
-						$.ajax({
-							url: "http://shopincomo.comune.como.it/ccn20/JSONidEserciziUpdate.php",
-							type: "GET",
-							dataType: "json",
-							data: {language: localStorage.getItem("codLingua"), dataDownload: dataDownload},
-							timeout: 15000
-						}).done(function(response){
-							if (response.length == 0 && fileEserciziMancanti.length == 0 && fileSistemaMancanti.length == 0 && fileCategorieMancanti.length == 0) {
-								localStorage.setItem("numeroAggiornamenti", 0);
-								//alert("NO aggiornamenti disponibili");
-								//$("p.countUpdates").html(""+window.localStorage.getItem("statusDatabase")+"");
-								$.mobile.loading( "hide" );
-							}
-							else {
-								numeroAggiornamenti = response.length + fileEserciziMancanti.length + fileSistemaMancanti.length + fileCategorieMancanti.length;
-								localStorage.setItem("numeroAggiornamenti", numeroAggiornamenti);
-								$( "#updateDisponibili" ).popup("open");
-								$.mobile.loading( "hide" );
-							}
-						}).fail(function(jqXHR, textStatus){
-							if(textStatus == 'timeout')
-							{     
-								if (fileEserciziMancanti.length == 0 && fileSistemaMancanti.length == 0 && fileCategorieMancanti.length == 0) {
-								$.mobile.loading( "hide" );
-								}
-								else {
-									$( "#updateDisponibili" ).popup("open");
-									$.mobile.loading( "hide" );
-								}
-							}
-							else
-							{
-								if (fileEserciziMancanti.length == 0 && fileSistemaMancanti.length == 0 && fileCategorieMancanti.length == 0) {
-								$.mobile.loading( "hide" );
-								}
-								else {
-									$( "#updateDisponibili" ).popup("open");
-									$.mobile.loading( "hide" );
-								}
-							}
-						});
-					
-					}); // end fileEntry.getMetadata
-				}
-					 
-				function onSetMetadataFileFail(){
-
-					console.log("Fail to set metadata file");
-
-				} // close onSetMetadataFileFail
-			
-		}); // end of window.requestFileSystem
 		
 	} // end of eserciziUpdate
-
-	var doneCheckUpdates = "si"
-	window.sessionStorage.setItem("doneCheckUpdates", doneCheckUpdates);
-	}
-	}
-	//FINE CHECK UPDATES
 	
 	function timeoutUpdate()
 	{
 		setTimeout(function(){
+		var doneCheckUpdates = "si"
+		window.sessionStorage.setItem("doneCheckUpdates", doneCheckUpdates);
 		$.mobile.loading( "hide" );
 		},15000);
 	}
