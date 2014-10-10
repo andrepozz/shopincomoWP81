@@ -1067,10 +1067,9 @@
 	$("h3.titoloDownloadEsercizi").html(window.localStorage.getItem("downloadEsercizi"));
 	
 	var jsonIdEsercizi = JSON.parse(window.localStorage.getItem("jsonNomeEsercizi"));
-	var numeroEsercizi = 40;
+	var numeroEsercizi = jsonIdEsercizi.length;
 	var codLingua = window.localStorage.getItem('codLingua');
 	var numeroBlocchiDownload = Math.floor(numeroEsercizi/20);
-	alert(numeroBlocchiDownload);
 	var widthBlocchiDownload = 100/numeroBlocchiDownload;
 	var startInterval = 0;
 	var iteration = 1;
@@ -1095,18 +1094,19 @@
 	
 	var startInterval = window.sessionStorage.getItem("startInterval");
 	
-	$.ajax({	
-		url: "http://shopincomo.comune.como.it/ccn20/JSONidEsercizi.php?start="+startInterval+"&end=20",
-		dataType: 'json',
-		success: function(data) {
-			$.each(data, function(index, info) {
-			var urlVetrinaEsercizio = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+info.idEsercizio+"");
-			var dataName = "json"+info.idEsercizio+"";
-			downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi)
-			});
-		}
-	});
+	var urlIdEsercizi = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONidEsercizi.php?start="+startInterval+"&end=20");
 	
+	$.getJSON(urlIdEsercizi)
+	.done(function(data) {	
+		$.each(data, function(index, info) {
+		var urlVetrinaEsercizio = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+info.idEsercizio+"");
+		var dataName = "json"+info.idEsercizio+"";
+		downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi)
+		});				
+	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+		downloadVetrine(numeroEsercizi);
+	}); // ajax
+		
 	}//FUNCTION INTERVAL VETRINE
 	
 	
@@ -1118,17 +1118,15 @@
 	$.getJSON(urlVetrinaEsercizio)
 	.done(function(data) {
 		countVetrine = parseInt(countVetrine)+1;
-		alert(countVetrine);
 		window.sessionStorage.setItem("startInterval", countVetrine);
 		
 		window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 		if(countVetrine == numeroEsercizi){
 			$("p.downloadCompleteVetrina").html("<a href='#foursquare' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
 		}
-		if (countVetrine == parseInt(iteration)*20){
+		else if (countVetrine == parseInt(iteration)*20){
 			$("div."+iteration+"").css("background","#00CC00");	
 			iteration = parseInt(iteration)+1;
-			alert("iteration "+iteration);
 			window.sessionStorage.setItem("iteration", iteration);
 			downloadVetrine(numeroEsercizi);
 		}			
