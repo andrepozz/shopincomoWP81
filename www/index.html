@@ -1067,7 +1067,7 @@
 	$("h3.titoloDownloadEsercizi").html(window.localStorage.getItem("downloadEsercizi"));
 	
 	var jsonIdEsercizi = JSON.parse(window.localStorage.getItem("jsonNomeEsercizi"));
-	var numeroEsercizi = jsonIdEsercizi.length;
+	var numeroEsercizi = 40;
 	var codLingua = window.localStorage.getItem('codLingua');
 	var numeroBlocchiDownload = Math.floor(numeroEsercizi/20);
 	alert(numeroBlocchiDownload);
@@ -1075,16 +1075,17 @@
 	alert(widthBlocchiDownload);
 	var startInterval = 0;
 	var iteration = 1;
+	var countVetrine = 0;
 	
 	
 	for (i=1; i<=numeroBlocchiDownload; i++) {
 		$("div.progressBar").append("<div class='"+i+"' style='width:"+widthBlocchiDownload.toFixed(2)+"%; height:40px; float:left'></div>");
 	}
 	
-	downloadVetrine(startInterval, numeroEsercizi, iteration);
+	downloadVetrine(startInterval, numeroEsercizi, iteration, countVetrine);
 	
 
-	function downloadVetrine(startInterval, numeroEsercizi, iteration) {
+	function downloadVetrine(startInterval, numeroEsercizi, iteration, countVetrine) {
 	
 	var lastDownload = new Date();
 	var lastDownload = lastDownload.getTime();
@@ -1097,7 +1098,7 @@
 			$.each(data, function(index, info) {
 			var urlVetrinaEsercizio = encodeURI("http://shopincomo.comune.como.it/ccn20/JSONvetrinaEsercizio.php?language="+codLingua+"&idEsercizio="+info.idEsercizio+"");
 			var dataName = "json"+info.idEsercizio+"";
-			downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration)
+			downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration, countVetrine)
 			});
 		}
 	});
@@ -1106,9 +1107,7 @@
 	
 	
 	
-	function downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration){
-	alert(numeroEsercizi);
-	alert(iteration);
+	function downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration, countVetrine){
 	$.getJSON(urlVetrinaEsercizio)
 	.done(function(data) {
 		countVetrine = parseInt(countVetrine)+1;
@@ -1125,7 +1124,7 @@
 			downloadVetrine(startInterval, numeroEsercizi, iteration);
 		}			
 	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
-		downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration)
+		downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi, iteration, countVetrine)
 	}); // ajax
 	
 	}
