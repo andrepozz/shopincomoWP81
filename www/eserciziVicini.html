@@ -116,8 +116,8 @@
 		//var path = window.localStorage.getItem("pathSD");
 		//var jsonPositionDir = path + "/position.js";
 		//var jsonPositionDir = "js/position.js";
-		var jsonPositionDir = window.localStorage.getItem('jsonPosizioneEsercizi');
-		alert(jsonPositionDir);
+		var jsonPosizioneEsercizi = window.localStorage.getItem('jsonPosizioneEsercizi');
+		alert(jsonPosizioneEsercizi);
 			
 	//CHECK GEOLOCATION
 	if(window.sessionStorage.getItem("userLatitude") == null) {
@@ -155,7 +155,7 @@
 		var eserciziVicini = [];
 		
 		//NEAREST NODE
-		$.each(JSON.parse(jsonPositionDir), function(index, info) {
+		$.each(JSON.parse(jsonPosizioneEsercizi), function(index, info) {
 
 			var currentDistance;
 			var currentEsercizio;
@@ -264,7 +264,7 @@
 		var eserciziVicini = [];
 		
 		//NEAREST NODE
-		$.each(JSON.parse(jsonPositionDir), function(index, info) {
+		$.each(JSON.parse(jsonPosizioneEsercizi), function(index, info) {
 
 			var currentDistance;
 			var currentEsercizio;
@@ -356,7 +356,7 @@
 			//var path = window.localStorage.getItem("pathSD");
 			//var jsonPositionDir = path + "/position.js";
 			//var jsonPositionDir = "js/position.js";
-		var jsonPositionDir = window.localStorage.getItem('jsonPosizioneEsercizi');
+		var jsonPosizioneEsercizi = window.localStorage.getItem('jsonPosizioneEsercizi');
 		//$.getJSON(jsonPositionDir, function( jsonPosition ) {
 		
 		userLatitudeVicini = window.sessionStorage.getItem("userLatitude");
@@ -366,7 +366,7 @@
 		var eserciziVicini = [];
 		
 			//NEAREST NODE
-			$.each(JSON.parse(jsonPositionDir), function(index, info) {
+			$.each(JSON.parse(jsonPosizioneEsercizi), function(index, info) {
 
 			var currentDistance;
 			var currentEsercizio;
@@ -518,14 +518,14 @@
 		//var jsonPositionDir = path + "/position.js";
 		//var jsonPositionDir = "js/position.js";
 		
-	var jsonPositionDir = window.localStorage.getItem('jsonPosizioneEsercizi');
+	var jsonPosizioneEsercizi = window.localStorage.getItem('jsonPosizioneEsercizi');
 	
 	//$.getJSON(jsonPositionDir, function( jsonPosition ) {
 	
 	var eserciziVicini = [];
 	
 		//NEAREST NODE
-		$.each(JSON.parse(jsonPositionDir), function(index, info) {
+		$.each(JSON.parse(jsonPosizioneEsercizi), function(index, info) {
 		
 		var currentDistance;
 		var currentEsercizio;
