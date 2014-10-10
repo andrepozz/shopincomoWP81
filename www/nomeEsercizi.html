@@ -55,11 +55,11 @@
 	
 	$("p.descrizioneRicercaNome").html(""+window.localStorage.getItem("placeholderNome")+"");
 
-	
 	//CARICA JSON CATEGORIE
-	var path = window.localStorage.getItem("pathSD");
-	var jsonPath = path + "/nomeEsercizi.js";
-	//var jsonPath = "js/nomeesercizi.js";
+		//var path = window.localStorage.getItem("pathSD");
+		//var jsonPath = path + "/nomeEsercizi.js";
+		//var jsonPath = "js/nomeesercizi.js";
+	var jsonNomeEsercizi = window.localStorage.getItem('jsonNomeEsercizi');
 	
 		$( "#cerca_negozio" ).on( "filterablebeforefilter", function ( e, data ) {
 			var $ul = $( this ),
@@ -76,9 +76,7 @@
 				
 				//$.getJSON(jsonPath, function( data ) {
 				
-				var data = window.localStorage.getItem('jsonNomeEsercizi');
-		
-				json_filter = $.grep(JSON.parse(data), function(item){
+				json_filter = $.grep(JSON.parse(jsonNomeEsercizi), function(item){
 				return matcher.test(item.nomeEsercizio); 
 				})
 				
@@ -104,6 +102,7 @@
 	
 	$(document).on("click", 'a.esercizio', function(){
 		idEsercizio = $(this).attr('idEsercizio');
+		idEsercizio = window.sessionStorage.setItem("idEsercizio", idEsercizio);
 	});
 	</script>
 		
@@ -158,25 +157,12 @@
 	}
 	
 	// CARICA FILE VETRINA
-	var path = window.localStorage.getItem("pathSD");
-	var jsonPath = path + "/esercizi/"+idEsercizio+".js";
-	alert(jsonPath);
-	//var jsonPath = "js/16.js";
-	var jsonVetrina;
+		//var path = window.localStorage.getItem("pathSD");
+		//var jsonPath = path + "/esercizi/"+idEsercizio+".js";
+		//var jsonPath = "js/16.js";
+	var idEsercizio = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
 		
-	$.ajax({
-		url: jsonPath,
-		dataType: 'json',
-		async: false
-	}).done(function(data) {
-		alert("success");
-		jsonVetrina = data;
-		sessionStorage.setItem('jsonVetrina', JSON.stringify(jsonVetrina));
-	}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
-		alert("Status: " + textStatus);
-		alert("Error: " + errorThrown); 
-	}); // ajax
-	
 	// NOME ESERCIZIO + INDIRIZZO + DESCRIZIONE
 	var esercizioLatitude;
 	var esercizioLongitude;
@@ -745,14 +731,15 @@
 		function onBackKeyDown(e) {
 		e.preventDefault();
 		}
-	
-	var jsonVetrina = window.sessionStorage.getItem("jsonVetrina");
-	
+		
 	// NOME ESERCIZIO + ORARI ESERCIZIO
 	
 	$("ul#orariEsercizio").html("");
 	
-	$.each(JSON.parse(jsonVetrina), function(index, info) {
+	var idEsercizio = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
+	
+	$.each(jsonVetrina, function(index, info) {
 				
 		if (info.mostraOrari == "si"){
 		$("ul#orariEsercizio").append($("<li data-role='list-divider'>"+window.localStorage.getItem("orariApertura")+"</li>"));
@@ -826,13 +813,14 @@
 		e.preventDefault();
 		}
 	
-	var jsonVetrina = window.sessionStorage.getItem("jsonVetrina");
+	var idEsercizio = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
 	
 	// NOME ESERCIZIO + CONTATTI ESERCIZIO
 	
 	$("ul#contattiEsercizio").html("");
 	
-	$.each(JSON.parse(jsonVetrina), function(index, info) {
+	$.each(jsonVetrina, function(index, info) {
 				
 		$("ul#contattiEsercizio").append($("<li data-role='list-divider'>"+window.localStorage.getItem("contatti")+"</li>"));
 		$("ul#contattiEsercizio").append($("<li>"+info.Indirizzo+" "+info.Citta+"</li>"));
@@ -914,14 +902,15 @@
 	$(".intervalli").append($('<button class="ui-btn" id="intervallo"value="15giorni">15 '+window.localStorage.getItem("giorni")+'</button>'));
 	$(".intervalli").append($('<button class="ui-btn" id="intervallo" value="30giorni">30 '+window.localStorage.getItem("giorni")+'</button>'));
 	
-	var jsonVetrina = window.sessionStorage.getItem("jsonVetrina");
+	var idEsercizio = window.sessionStorage.getItem("idEsercizio");
+	var jsonVetrina = JSON.parse(window.localStorage.getItem("json"+idEsercizio+""));
 	
 	// NOME ESERCIZIO + STATISTICHE
 	
 	var checkStatistiche;
 	var idEsercizio;
 	
-		$.each(JSON.parse(jsonVetrina), function(index, info) {
+		$.each(jsonVetrina, function(index, info) {
 				
 			$("h3.nomeEsercizio").html(info.NomeEsercizio);
 			idEsercizio = info.idEsercizio;
