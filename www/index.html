@@ -1112,6 +1112,9 @@
 	
 	
 	function downloadVetrinaEsercizio(urlVetrinaEsercizio, dataName, numeroEsercizi){
+	
+	var iteration = window.sessionStorage.getItem("iteration");
+	
 	$.getJSON(urlVetrinaEsercizio)
 	.done(function(data) {
 		countVetrine = parseInt(countVetrine)+1;
