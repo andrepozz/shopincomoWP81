@@ -1009,7 +1009,6 @@
 				
 		$.getJSON(urlSottocategorie)
 		.done(function(data) {
-			alert(dataName);
 			window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 						
 		}).fail(function(XMLHttpRequest, textStatus, errorThrown) {
