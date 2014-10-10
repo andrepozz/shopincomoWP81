@@ -71,7 +71,6 @@
 	$(document).on("click", 'a.categoria', function(){
 		idCategoria = $(this).attr('id');
 		jsonName = $(this).attr('jsonName');
-		alert(jsonName);
 		window.sessionStorage.setItem("idCategoria", idCategoria);
 		window.sessionStorage.setItem("jsonName", jsonName);
 				
