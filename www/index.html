@@ -787,7 +787,7 @@
 		
 		window.localStorage.setItem(''+dataName+'', JSON.stringify(data));
 		if(countVetrine == numeroEsercizi){
-			window.sessionStorage.setItem("updateWindows81", 1);
+			window.localStorage.setItem("updateWindows81", 1);
 			$("p.downloadCompleteVetrina").html("<a href='#foursquare' class='ui-btn' data-transition='slide'>"+window.localStorage.getItem("continua")+"</a>");
 		}
 		else if (countVetrine == parseInt(iteration)*20){
